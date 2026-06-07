@@ -31,7 +31,7 @@ export const parseCoordinatesToLocation = (str?: string): Location | undefined =
 
 export function posToLocation(pos: maplibregl.LngLatLike, level?: number): Location {
 	const { lat, lng } = maplibregl.LngLat.convert(pos);
-	const label = level == undefined ? `${lat},${lng}` : `${lat},${lng},${level}`;
+	const label = level == undefined ? `${lat.toFixed(6)},${lng.toFixed(6)}` : `${lat.toFixed(6)},${lng.toFixed(6)},${level}`;
 	return {
 		label,
 		match: {

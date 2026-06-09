@@ -152,12 +152,12 @@
 	<div class="flex flex-row gap-2 flex-wrap">
 		<DateInput bind:value={time} />
 		<RadioGroup.Root
-			class="flex"
+			class="flex gap-0"
 			bind:value={() => (arriveBy ? 'arrival' : 'departure'), (v) => (arriveBy = v === 'arrival')}
 		>
 			<Label
 				for="departure"
-				class="flex items-center rounded-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
+				class="flex items-center rounded-l-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
 			>
 				<RadioGroup.Item
 					value="departure"
@@ -169,7 +169,7 @@
 			</Label>
 			<Label
 				for="arrival"
-				class="flex items-center rounded-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
+				class="flex items-center rounded-r-md border-2 border-muted bg-popover p-1 px-2 hover:bg-accent hover:text-accent-foreground [&:has([data-state=checked])]:border-blue-600 hover:cursor-pointer"
 			>
 				<RadioGroup.Item value="arrival" id="arrival" class="sr-only" aria-label={t.arrival} />
 				<span>{t.arrival}</span>

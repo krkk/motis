@@ -203,39 +203,103 @@ export const getStyle = (
 				}
 			},
 			{
-				id: 'landuse',
+				id: 'landuse_complex',
 				type: 'fill',
 				source: 'osm',
 				'source-layer': 'landuse',
-				filter: ['!in', 'landuse', 'park', 'public_transport'],
+				filter: ['==', ['get', 'landuse'], 'complex'],
 				paint: {
-					'fill-color': [
-						'match',
-						['get', 'landuse'],
-						'complex',
-						c.landuseComplex,
-						'commercial',
-						c.landuseCommercial,
-						'industrial',
-						c.landuseIndustrial,
-						'residential',
-						c.landuseResidential,
-						'retail',
-						c.landuseRetail,
-						'construction',
-						c.landuseConstruction,
-
-						'nature_light',
-						c.landuseNatureLight,
-						'nature_heavy',
-						c.landuseNatureHeavy,
-						'cemetery',
-						c.landuseCemetery,
-						'beach',
-						c.landuseBeach,
-
-						'magenta'
-					]
+					'fill-color': c.landuseComplex
+				}
+			},
+			{
+				id: 'landuse_commercial',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'commercial'],
+				paint: {
+					'fill-color': c.landuseCommercial
+				}
+			},
+			{
+				id: 'landuse_industrial',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'industrial'],
+				paint: {
+					'fill-color': c.landuseIndustrial
+				}
+			},
+			{
+				id: 'landuse_residential',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'residential'],
+				paint: {
+					'fill-color': c.landuseResidential
+				}
+			},
+			{
+				id: 'landuse_retail',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'retail'],
+				paint: {
+					'fill-color': c.landuseRetail
+				}
+			},
+			{
+				id: 'landuse_contruction',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'construction'],
+				paint: {
+					'fill-color': c.landuseConstruction
+				}
+			},
+			{
+				id: 'landuse_nature_light',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'nature_light'],
+				paint: {
+					'fill-color': c.landuseNatureLight
+				}
+			},
+			{
+				id: 'landuse_nature_heavy',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'nature_heavy'],
+				paint: {
+					'fill-color': c.landuseNatureHeavy
+				}
+			},
+			{
+				id: 'landuse_cemetery',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'cemetery'],
+				paint: {
+					'fill-color': c.landuseCemetery
+				}
+			},
+			{
+				id: 'landuse_beach',
+				type: 'fill',
+				source: 'osm',
+				'source-layer': 'landuse',
+				filter: ['==', ['get', 'landuse'], 'beach'],
+				paint: {
+					'fill-color': c.landuseBeach
 				}
 			},
 			{

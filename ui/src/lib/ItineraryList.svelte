@@ -86,7 +86,7 @@
 		{/if}
 
 		{#if r.itineraries.length !== 0}
-			<div class="flex flex-col space-y-6 px-4 py-8">
+			<div class="flex flex-col space-y-4 px-4 py-8">
 				{#each routingResponses as r, rI (rI)}
 					{#await r}
 						<div class="flex items-center justify-center w-full">
@@ -129,8 +129,8 @@
 								}}
 							>
 								<Card class="p-4">
-									<div class="text-base flex justify-around items-start space-x-1 w-full">
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
+									<div class="text-base flex justify-between items-start space-x-1 w-full">
+										<div class="overflow-hidden basis-1/5 h-full flex flex-col">
 											<div class="text-xs font-bold uppercase text-slate-400">{t.departure}</div>
 											<Time
 												isRealtime={isRealtime(
@@ -143,8 +143,16 @@
 												timeZone={it.legs[0].from.tz}
 											/>
 										</div>
-										<Separator orientation="vertical" />
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
+										<div class="overflow-hidden basis-3/5 h-full flex flex-col text-sm leading-none text-slate-400">
+											<div class="text-center text-nowrap">
+												{formatDurationSec(it.duration)}
+											</div>
+											<Separator class="m-1 h-[2px]" />
+											<div class="text-center text-nowrap">
+												{it.transfers} {t.transfers}
+											</div>
+										</div>
+										<div class="overflow-hidden basis-1/5 h-full flex flex-col">
 											<div class="text-xs font-bold uppercase text-slate-400">{t.arrival}</div>
 											<Time
 												isRealtime={isRealtime(
@@ -157,26 +165,7 @@
 												timeZone={it.legs[it.legs.length - 1].to.tz}
 											/>
 										</div>
-										<Separator orientation="vertical" />
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
-											<div class="text-xs font-bold uppercase text-slate-400">
-												{t.transfers}
-											</div>
-											<div class="text-center text-nowrap">
-												{it.transfers}
-											</div>
-										</div>
-										<Separator orientation="vertical" />
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
-											<div class="text-xs font-bold uppercase text-slate-400">
-												{t.duration}
-											</div>
-											<div class="text-center text-nowrap">
-												{formatDurationSec(it.duration)}
-											</div>
-										</div>
 									</div>
-									<Separator class="my-2" />
 									<div class="mt-4 flex flex-wrap gap-x-3 gap-y-3">
 										{#each it.legs.filter((l, i) => (i == 0 && l.duration > 1) || (i == it.legs.length - 1 && l.duration > 1) || l.displayName || l.mode != 'WALK') as l, i (i)}
 											{@render legSummary(l)}

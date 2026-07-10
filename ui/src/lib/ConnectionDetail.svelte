@@ -310,7 +310,7 @@
 		{@const includedInTransfer =
 			fareTransfer.rule == 'AB' || (fareTransfer.rule == 'A_AB' && l.effectiveFareLegIndex !== 0)}
 		{#if includedInTransfer || fareTransfer.effectiveFareLegProducts[l.effectiveFareLegIndex].length > 0}
-			<div class="pl-1 md:pl-4 my-8 text-xs font-bold">
+			<div class="pl-1 md:pl-4 my-8 text-sm">
 				{#if includedInTransfer || (prevTransitLeg && prevTransitLeg.fareTransferIndex === l.fareTransferIndex && prevTransitLeg.effectiveFareLegIndex === l.effectiveFareLegIndex)}
 					{t.includedInTicket}
 				{:else}
@@ -429,7 +429,7 @@
 				{#if l.alternatives && l.alternatives.length > 0}
 					{@const hasPrevTransit = legs.slice(0, i).some(isTransitLeg)}
 					{@const hasNextTransit = legs.slice(i + 1).some(isTransitLeg)}
-					<div class="mt-3 mb-1 pl-2 text-xs text-muted-foreground">
+					<div class="mt-3 mb-1 pl-2 text-sm text-muted-foreground">
 						{!hasPrevTransit && hasNextTransit ? t.earlierAlternatives : t.laterAlternatives}
 					</div>
 					<div class="mb-3 flex gap-2 overflow-hidden">

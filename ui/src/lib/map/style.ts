@@ -64,7 +64,7 @@ export const colors = {
 		shield: 'shield'
 	},
 	dark: {
-		background: '#292929',
+		background: '#0c0c0c',
 
 		water: '#1f2830',
 		rail: '#808080',

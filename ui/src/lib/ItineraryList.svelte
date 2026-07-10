@@ -113,7 +113,7 @@
 									selectItinerary(it);
 								}}
 							>
-								<Card class="p-4">
+								<Card class="p-4 transition hover:bg-accent hover:text-accent-foreground">
 									<div class="text-base flex justify-between items-start space-x-1 w-full">
 										<div class="overflow-hidden basis-1/5 h-full flex flex-col">
 											<div class="text-xs font-bold uppercase text-slate-400">{t.departure}</div>

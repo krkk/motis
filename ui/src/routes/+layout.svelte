@@ -11,8 +11,7 @@
 		TrainFront,
 		Waypoints,
 		MountainSnow,
-		Compass,
-		RefreshCw
+		Compass
 	} from '@lucide/svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { getStyle } from '$lib/map/style';
@@ -41,7 +40,6 @@
 		type Match
 	} from '@motis-project/motis-client';
 	import ItineraryList from '$lib/ItineraryList.svelte';
-	import ConnectionDetail from '$lib/ConnectionDetail.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import ItineraryGeoJson from '$lib/map/itineraries/ItineraryGeoJSON.svelte';
 	import maplibregl from 'maplibre-gl';
@@ -54,7 +52,6 @@
 	import { lngLatToStr } from '$lib/lngLatToStr';
 	import Drawer from '$lib/map/Drawer.svelte';
 	import { client } from '@motis-project/motis-client';
-	import StopTimes from '$lib/StopTimes.svelte';
 	import { onMount, tick, untrack } from 'svelte';
 	import { language, t } from '$lib/i18n/translation';
 	import { pushState, replaceState } from '$app/navigation';
@@ -78,7 +75,6 @@
 	} from '$lib/Modes';
 	import { defaultQuery, omitDefaults } from '$lib/defaults';
 	import { LEVEL_MIN_ZOOM } from '$lib/constants';
-	import StopGeoJSON from '$lib/map/stops/StopsGeoJSON.svelte';
 	import RailViz from '$lib/RailViz.svelte';
 	import StopsView from '$lib/map/stops/StopsView.svelte';
 	import { formatDate } from '$lib/toDateTime';
@@ -772,7 +768,6 @@
 	let baseResponse = $state<Promise<PlanResponse>>();
 	let routingResponses = $state<Array<Promise<PlanResponse>>>([]);
 	let stopNameFromResponse = $state<string>('');
-	let refreshingItinerary = $state(false);
 	let pageTitle = $derived(
 		getPageTitle(
 			{
@@ -788,47 +783,6 @@
 			t
 		)
 	);
-
-	const refreshSelectedItinerary = async () => {
-		const itineraryId = page.state.selectedItinerary?.id;
-		if (!itineraryId || refreshingItinerary) {
-			return;
-		}
-
-		refreshingItinerary = true;
-		try {
-			const { data: refreshed, error } = await refreshItinerary({
-				query: {
-					itineraryId,
-					joinInterlinedLegs: false,
-					detailedLegs: true,
-					detailedTransfers: true,
-					withFares: true,
-					numLegAlternatives: 3,
-					language: [language],
-					...refreshLegAlternativeParams
-				}
-			});
-
-			if (error) {
-				console.log(error);
-				alert(String((error as Record<string, unknown>).error?.toString() ?? error));
-				return;
-			}
-			if (refreshed && page.state.selectedItinerary?.id === itineraryId) {
-				updateItinerary(refreshed, from, to);
-				replaceState('', {
-					...page.state,
-					selectedItinerary: refreshed
-				});
-			}
-		} catch (e) {
-			console.log(e);
-			alert(String(e));
-		} finally {
-			refreshingItinerary = false;
-		}
-	};
 
 	const baseSearch = (baseQuery: PlanData) => {
 		const base = plan(baseQuery).then(preprocessItinerary(from, to));
@@ -1240,55 +1194,6 @@
 					{/each}
 				{/await}
 			{/each}
-		{/if}
-	{/if}
-
-	{#if activeTab == 'connections' && page.state.selectedItinerary}
-		<Control class="min-h-0 md:mb-2 md:flex">
-			<Card class="w-[520px] bg-background rounded-lg  flex flex-col mb-2">
-				<div class="w-full flex justify-between items-center shadow-md pl-1 mb-1">
-					<div class="ml-2 flex items-baseline gap-2">
-						<h2 class="text-base font-semibold">{t.journeyDetails}</h2>
-						{#if page.state.selectedItinerary.legs.length > 0}
-							{@const firstLeg = page.state.selectedItinerary.legs[0]}
-							<span class="text-sm text-muted-foreground">
-								{formatDate(new Date(firstLeg.startTime), firstLeg.from.tz)}
-							</span>
-						{/if}
-					</div>
-					<div class="flex items-center">
-						<Button
-							variant="ghost"
-							size="icon"
-							title={t.refreshItinerary}
-							aria-label={t.refreshItinerary}
-							disabled={refreshingItinerary || !page.state.selectedItinerary.id}
-							onclick={refreshSelectedItinerary}
-						>
-							<RefreshCw class={refreshingItinerary ? 'animate-spin' : ''} />
-						</Button>
-						<Button
-							variant="ghost"
-							size="icon"
-							onclick={() => {
-								history.back();
-							}}
-						>
-							<X />
-						</Button>
-					</div>
-				</div>
-				<div
-					class={'p-2 md:p-4 overflow-y-auto overflow-x-hidden min-h-0 ' +
-						(showMap ? 'md:max-h-[60vh]' : '')}
-				>
-					<ConnectionDetail itinerary={page.state.selectedItinerary} />
-				</div>
-			</Card>
-		</Control>
-		{#if showMap}
-			<ItineraryGeoJson itinerary={page.state.selectedItinerary} selected={true} {level} {theme} />
-			<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
 		{/if}
 	{/if}
 

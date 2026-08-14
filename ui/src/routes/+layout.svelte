@@ -84,7 +84,9 @@
 	import { formatDate } from '$lib/toDateTime';
 	import { getPageTitle } from '$lib/pageTitle';
 
+    import { initLayout } from "$lib/layout.svelte.js";
 	const { children } = $props();
+    const mapSlots = initLayout();
 
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -1290,44 +1292,6 @@
 		{/if}
 	{/if}
 
-	{#if activeTab == 'departures' && page.state.selectedStop}
-		<Control class="min-h-0 md:mb-2">
-			<Card class="w-[520px] md:max-h-[60vh] h-full bg-background rounded-lg flex flex-col mb-2">
-				<div class="w-full flex justify-between items-center shadow-md pl-1 mb-1">
-					<h2 class="ml-2 text-base font-semibold">
-						{#if page.state.stopArriveBy}
-							{t.arrivals}
-						{:else}
-							{t.departures}
-						{/if}
-						in
-						{stopNameFromResponse}
-					</h2>
-					<Button
-						variant="ghost"
-						onclick={() => {
-							history.back();
-						}}
-					>
-						<X />
-					</Button>
-				</div>
-				<div class="p-2 md:p-4 overflow-y-auto overflow-x-hidden min-h-0 md:max-h-[60vh]">
-					<StopTimes
-						stopId={page.state.selectedStop.stopId}
-						stopName={page.state.selectedStop.name}
-						time={page.state.selectedStop.time}
-						bind:stop
-						bind:stopMarker
-						bind:stopNameFromResponse
-						arriveBy={page.state.stopArriveBy}
-						exactRadius={page.state.exactRadius}
-					/>
-				</div>
-			</Card>
-		</Control>
-	{/if}
-
 	{#if activeTab == 'isochrones' && one.match}
 		<Control class="min-h-0 md:mb-2 {isochronesOptions.status == 'DONE' ? 'hide' : ''}">
 			<Card class="w-[520px] overflow-y-auto overflow-x-hidden bg-background rounded-lg">
@@ -1490,16 +1454,6 @@
 				/>
 			{/if}
 
-			{#if stop && activeTab == 'departures'}
-				<Marker
-					color="black"
-					draggable={false}
-					{level}
-					bind:location={stop}
-					bind:marker={stopMarker}
-				/>
-			{/if}
-
 			{#if to && activeTab == 'connections'}
 				<Marker color="red" draggable={true} {level} bind:location={to} bind:marker={toMarker} />
 			{/if}
@@ -1512,6 +1466,10 @@
 					bind:location={one}
 					bind:marker={oneMarker}
 				/>
+			{/if}
+
+			{#if mapSlots.custom}
+				{@render mapSlots.custom()}
 			{/if}
 		{/if}
 	</Map>

@@ -255,10 +255,11 @@ jobs:
           tar -C ./motis -cjf motis-macos-arm64.tar.bz2 ./motis ./tiles-profiles ./ui
 
       - name: Upload Distribution
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: motis-macos-arm64
           path: motis-macos-arm64.tar.bz2
+          archive: false
 
       # ==== RELEASE ====
       - name: Upload Release
@@ -366,10 +367,11 @@ jobs:
 
       - name: Upload Distribution
         if: matrix.config.artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: motis-${{ matrix.config.artifact }}
           path: motis-${{ matrix.config.artifact }}.tar.bz2
+          archive: false
 
       # ==== RELEASE ====
       - name: Upload Release

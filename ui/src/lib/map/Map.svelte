@@ -12,6 +12,7 @@
 	} from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
 	import Debug from '$lib/Debug.svelte';
+	import LevelSelect from '$lib/LevelSelect.svelte';
 	import { Button } from '$lib/components/ui/button';
 
 	// required for correct rendering of RTL scripts (Arabic, Hebrew, ...);
@@ -25,7 +26,7 @@
 		bounds = $bindable(),
 		center = $bindable(),
 		bearing = $bindable(),
-		level,
+		level = $bindable(),
 		style,
 		attribution,
 		transformRequest,
@@ -176,6 +177,8 @@
 			</Button>
 		</Control>
 	{/if}
+
+	<LevelSelect {bounds} {zoom} bind:level />
 
 	{#if children}
 		{@render children()}

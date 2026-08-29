@@ -46,7 +46,6 @@
 	import { getUrlArray, onClickStop, onClickTrip, pushStateWithQueryString } from '$lib/utils';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
-	import LevelSelect from '$lib/LevelSelect.svelte';
 	import { lngLatToStr } from '$lib/lngLatToStr';
 	import Drawer from '$lib/map/Drawer.svelte';
 	import { client } from '@motis-project/motis-client';
@@ -1315,15 +1314,13 @@
 		bind:zoom
 		bind:center
 		bind:bearing
-		{level}
+		bind:level
 		{hasDebug}
 		bind:showRoutes
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
 	>
-		<LevelSelect {bounds} {zoom} bind:level />
-
 		<div class="maplibregl-ctrl-{isSmallScreen.current ? 'top-left' : 'bottom-right'}">
 			<div class="maplibregl-ctrl maplibregl-ctrl-attrib">
 				<div class="maplibregl-ctrl-attrib-inner">

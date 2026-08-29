@@ -11,6 +11,7 @@
 		Waypoints
 	} from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
+	import StopsView from '$lib/map/stops/StopsView.svelte';
 	import Debug from '$lib/Debug.svelte';
 	import LevelSelect from '$lib/LevelSelect.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -36,6 +37,9 @@
 		isSmallScreen,
 		withHillshades,
 		dataAttributionLink,
+		showMap,
+		colorMode,
+		theme,
 		children,
 		class: className
 	}: {
@@ -53,6 +57,9 @@
 		isSmallScreen: boolean;
 		withHillshades: boolean;
 		dataAttributionLink: string | undefined;
+		showMap: boolean;
+		colorMode: 'none' | 'stops' | 'rt' | 'route' | 'mode';
+		theme: 'light' | 'dark';
 		children?: Snippet;
 		class: string;
 	} = $props();
@@ -193,6 +200,20 @@
 			</div>
 		</div>
 	</div>
+
+	{#if showMap}
+		{#if colorMode === 'stops'}
+			<StopsView {map} {bounds} {zoom} {level} {theme} />
+		{/if}
+		{#await import('$lib/RailViz.svelte') then { default: RailViz }}
+			<RailViz
+				{map}
+				{bounds}
+				{zoom}
+				colorMode={colorMode === 'rt' || colorMode === 'route' || colorMode === 'mode' ? colorMode : 'none'}
+			/>
+		{/await}
+	{/if}
 
 	{#if children}
 		{@render children()}

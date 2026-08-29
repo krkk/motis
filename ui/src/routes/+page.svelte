@@ -7,7 +7,6 @@
 		LocateFixed,
 		MapPin,
 		TrainFront,
-		Waypoints,
 		MountainSnow,
 		Compass,
 		RefreshCw
@@ -45,7 +44,6 @@
 	import maplibregl from 'maplibre-gl';
 	import { browser } from '$app/environment';
 	import { getUrlArray, onClickStop, onClickTrip, pushStateWithQueryString } from '$lib/utils';
-	import Debug from '$lib/Debug.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
 	import LevelSelect from '$lib/LevelSelect.svelte';
@@ -1317,26 +1315,13 @@
 		bind:zoom
 		bind:center
 		bind:bearing
+		{level}
+		{hasDebug}
+		bind:showRoutes
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
 	>
-		{#if hasDebug}
-			<Control position="top-right" class="text-right">
-				<Debug {bounds} {level} {zoom} />
-				<Button
-					size="icon"
-					variant={showRoutes ? 'default' : 'outline'}
-					aria-label="Toggle routes overlay"
-					onclick={() => {
-						showRoutes = !showRoutes;
-					}}
-				>
-					<Waypoints class="w-5 h-5" />
-				</Button>
-			</Control>
-		{/if}
-
 		<LevelSelect {bounds} {zoom} bind:level />
 
 		<div class="maplibregl-ctrl-{isSmallScreen.current ? 'top-left' : 'bottom-right'}">

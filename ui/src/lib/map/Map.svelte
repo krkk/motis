@@ -7,6 +7,13 @@
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
 
+	import {
+		Waypoints
+	} from '@lucide/svelte';
+	import Control from '$lib/map/Control.svelte';
+	import Debug from '$lib/Debug.svelte';
+	import { Button } from '$lib/components/ui/button';
+
 	// required for correct rendering of RTL scripts (Arabic, Hebrew, ...);
 	// lazy: only loaded once RTL text is actually encountered
 	if (browser && maplibregl.getRTLTextPluginStatus() === 'unavailable') {
@@ -18,9 +25,12 @@
 		bounds = $bindable(),
 		center = $bindable(),
 		bearing = $bindable(),
+		level,
 		style,
 		attribution,
 		transformRequest,
+		hasDebug,
+		showRoutes = $bindable(),
 		children,
 		class: className
 	}: {
@@ -32,6 +42,9 @@
 		bounds?: maplibregl.LngLatBoundsLike | undefined;
 		bearing?: number | undefined;
 		zoom: number;
+		level: number;
+		hasDebug: boolean;
+		showRoutes: boolean;
 		children?: Snippet;
 		class: string;
 	} = $props();
@@ -148,6 +161,22 @@
 </script>
 
 <div use:createMap bind:this={el} class={className}>
+	{#if hasDebug}
+		<Control position="top-right" class="text-right">
+			<Debug {bounds} {level} {zoom} />
+			<Button
+				size="icon"
+				variant={showRoutes ? 'default' : 'outline'}
+				aria-label="Toggle routes overlay"
+				onclick={() => {
+					showRoutes = !showRoutes;
+				}}
+			>
+				<Waypoints class="w-5 h-5" />
+			</Button>
+		</Control>
+	{/if}
+
 	{#if children}
 		{@render children()}
 	{/if}

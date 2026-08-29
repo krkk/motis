@@ -1317,24 +1317,13 @@
 		bind:level
 		{hasDebug}
 		bind:showRoutes
+		isSmallScreen={isSmallScreen.current}
+		{withHillshades}
+		{dataAttributionLink}
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
 	>
-		<div class="maplibregl-ctrl-{isSmallScreen.current ? 'top-left' : 'bottom-right'}">
-			<div class="maplibregl-ctrl maplibregl-ctrl-attrib">
-				<div class="maplibregl-ctrl-attrib-inner">
-					&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
-					{#if withHillshades}
-						| <a href="https://mapterhorn.com/attribution" target="_blank">Mapterhorn</a>
-					{/if}
-					{#if dataAttributionLink}
-						| <a href={dataAttributionLink} target="_blank">{t.timetableSources}</a>
-					{/if}
-				</div>
-			</div>
-		</div>
-
 		{#if showMap}
 			{#if activeTab != 'isochrones'}
 				<Control position="top-right" class="w-fit float-right">

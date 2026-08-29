@@ -14,6 +14,7 @@
 	import Debug from '$lib/Debug.svelte';
 	import LevelSelect from '$lib/LevelSelect.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { t } from '$lib/i18n/translation';
 
 	// required for correct rendering of RTL scripts (Arabic, Hebrew, ...);
 	// lazy: only loaded once RTL text is actually encountered
@@ -32,6 +33,9 @@
 		transformRequest,
 		hasDebug,
 		showRoutes = $bindable(),
+		isSmallScreen,
+		withHillshades,
+		dataAttributionLink,
 		children,
 		class: className
 	}: {
@@ -46,6 +50,9 @@
 		level: number;
 		hasDebug: boolean;
 		showRoutes: boolean;
+		isSmallScreen: boolean;
+		withHillshades: boolean;
+		dataAttributionLink: string | undefined;
 		children?: Snippet;
 		class: string;
 	} = $props();
@@ -165,20 +172,27 @@
 	{#if hasDebug}
 		<Control position="top-right" class="text-right">
 			<Debug {bounds} {level} {zoom} />
-			<Button
-				size="icon"
-				variant={showRoutes ? 'default' : 'outline'}
-				aria-label="Toggle routes overlay"
-				onclick={() => {
-					showRoutes = !showRoutes;
-				}}
-			>
+			<Button size="icon" variant={showRoutes ? 'default' : 'outline'} aria-label="Toggle routes overlay" onclick={() => { showRoutes = !showRoutes; }}>
 				<Waypoints class="w-5 h-5" />
 			</Button>
 		</Control>
 	{/if}
 
 	<LevelSelect {bounds} {zoom} bind:level />
+
+	<div class="maplibregl-ctrl-{isSmallScreen ? 'top-left' : 'bottom-right'}">
+		<div class="maplibregl-ctrl maplibregl-ctrl-attrib">
+			<div class="maplibregl-ctrl-attrib-inner">
+				&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+				{#if withHillshades}
+					| <a href="https://mapterhorn.com/attribution" target="_blank">Mapterhorn</a>
+				{/if}
+				{#if dataAttributionLink}
+					| <a href={dataAttributionLink} target="_blank">{t.timetableSources}</a>
+				{/if}
+			</div>
+		</div>
+	</div>
 
 	{#if children}
 		{@render children()}

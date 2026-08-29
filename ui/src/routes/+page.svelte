@@ -1071,7 +1071,7 @@
 	</Button>
 {/snippet}
 {#snippet resultContent()}
-	<Control class="min-h-0 shrink-0 overflow-hidden">
+	<div class="min-h-0 shrink-0 overflow-hidden">
 		<Tabs.Root
 			bind:value={() => activeTab, setActiveTab}
 			class="flex h-full min-h-0 max-h-[97dvh] max-w-full w-[520px] flex-col overflow-hidden"
@@ -1188,10 +1188,10 @@
 				</Card>
 			</Tabs.Content>
 		</Tabs.Root>
-	</Control>
+	</div>
 
 	{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
-		<Control class="min-h-0 md:flex md:flex-col md:mb-2} ">
+		<div class="min-h-0 md:flex md:flex-col md:mb-2}">
 			<Card
 				class="scrollable w-[520px] h-full md:h-[70vh] {isSmallScreen.current
 					? 'border-0 shadow-none'
@@ -1207,11 +1207,11 @@
 					updateStartDest={preprocessItinerary(from, to)}
 				/>
 			</Card>
-		</Control>
+		</div>
 	{/if}
 
 	{#if activeTab == 'connections' && page.state.selectedItinerary}
-		<Control class="min-h-0 md:mb-2 md:flex">
+		<div class="min-h-0 md:mb-2 md:flex">
 			<Card class="w-[520px] bg-background rounded-lg  flex flex-col mb-2">
 				<div class="w-full flex justify-between items-center shadow-md pl-1 mb-1">
 					<div class="ml-2 flex items-baseline gap-2">
@@ -1252,11 +1252,11 @@
 					<ConnectionDetail itinerary={page.state.selectedItinerary} />
 				</div>
 			</Card>
-		</Control>
+		</div>
 	{/if}
 
 	{#if activeTab == 'departures' && page.state.selectedStop}
-		<Control class="min-h-0 md:mb-2">
+		<div class="min-h-0 md:mb-2">
 			<Card class="w-[520px] md:max-h-[60vh] h-full bg-background rounded-lg flex flex-col mb-2">
 				<div class="w-full flex justify-between items-center shadow-md pl-1 mb-1">
 					<h2 class="ml-2 text-base font-semibold">
@@ -1290,17 +1290,29 @@
 					/>
 				</div>
 			</Card>
-		</Control>
+		</div>
 	{/if}
 
 	{#if activeTab == 'isochrones' && one.match}
-		<Control class="min-h-0 md:mb-2 {isochronesOptions.status == 'DONE' ? 'hide' : ''}">
+		<div class="min-h-0 md:mb-2 {isochronesOptions.status == 'DONE' ? 'hide' : ''}">
 			<Card class="w-[520px] overflow-y-auto overflow-x-hidden bg-background rounded-lg">
 				<IsochronesInfo options={isochronesOptions} />
 			</Card>
-		</Control>
+		</div>
 	{/if}
 {/snippet}
+{#if browser}
+	{#if isSmallScreen.current}
+		<Drawer class="fixed top-1 w-full z-10 h-full mt-3 flex flex-col" bind:showMap>
+			{@render resultContent()}
+		</Drawer>
+	{:else}
+		<div class="fixed top-4 left-4 z-10 flex gap-2 flex-col max-h-[97vh]">
+			{@render resultContent()}
+		</div>
+	{/if}
+{/if}
+
 {#if dataLoaded}
 	<Map
 		bind:map
@@ -1329,18 +1341,6 @@
 		{/if}
 
 		<LevelSelect {bounds} {zoom} bind:level />
-
-		{#if browser}
-			{#if isSmallScreen.current}
-				<Drawer class="fixed w-full z-10 h-full mt-3 flex flex-col" bind:showMap>
-					{@render resultContent()}
-				</Drawer>
-			{:else}
-				<div class="maplibregl-ctrl-top-left flex flex-col max-h-[97vh]">
-					{@render resultContent()}
-				</div>
-			{/if}
-		{/if}
 
 		<div class="maplibregl-ctrl-{isSmallScreen.current ? 'top-left' : 'bottom-right'}">
 			<div class="maplibregl-ctrl maplibregl-ctrl-attrib">

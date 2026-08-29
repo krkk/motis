@@ -1208,24 +1208,6 @@
 				/>
 			</Card>
 		</Control>
-		{#if showMap && !page.state.selectedItinerary}
-			{#each routingResponses as r, rI (rI)}
-				{#await r then r}
-					{#each r.itineraries as it, i (i)}
-						<ItineraryGeoJson
-							itinerary={it}
-							id="{rI}-{i}"
-							selected={false}
-							selectItinerary={() => {
-								onSelectItinerary(it);
-							}}
-							{level}
-							{theme}
-						/>
-					{/each}
-				{/await}
-			{/each}
-		{/if}
 	{/if}
 
 	{#if activeTab == 'connections' && page.state.selectedItinerary}
@@ -1271,10 +1253,6 @@
 				</div>
 			</Card>
 		</Control>
-		{#if showMap}
-			<ItineraryGeoJson itinerary={page.state.selectedItinerary} selected={true} {level} {theme} />
-			<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
-		{/if}
 	{/if}
 
 	{#if activeTab == 'departures' && page.state.selectedStop}
@@ -1465,6 +1443,30 @@
 			/>
 
 			<Popup trigger="contextmenu" children={contextMenu} />
+
+			{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
+				{#each routingResponses as r, rI (rI)}
+					{#await r then r}
+						{#each r.itineraries as it, i (i)}
+							<ItineraryGeoJson
+								itinerary={it}
+								id="{rI}-{i}"
+								selected={false}
+								selectItinerary={() => {
+									onSelectItinerary(it);
+								}}
+								{level}
+								{theme}
+							/>
+						{/each}
+					{/await}
+				{/each}
+			{/if}
+
+			{#if activeTab == 'connections' && page.state.selectedItinerary}
+					<ItineraryGeoJson itinerary={page.state.selectedItinerary} selected={true} {level} {theme} />
+					<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
+			{/if}
 
 			{#if from && activeTab == 'connections'}
 				<Marker

@@ -77,7 +77,6 @@
 	import { defaultQuery, omitDefaults } from '$lib/defaults';
 	import { LEVEL_MIN_ZOOM } from '$lib/constants';
 	import StopGeoJSON from '$lib/map/stops/StopsGeoJSON.svelte';
-	import RailViz from '$lib/RailViz.svelte';
 	import StopsView from '$lib/map/stops/StopsView.svelte';
 	import { formatDate } from '$lib/toDateTime';
 	import { getPageTitle } from '$lib/pageTitle';
@@ -1444,14 +1443,16 @@
 			{#if colorMode === 'stops'}
 				<StopsView {map} {bounds} {zoom} {level} {theme} />
 			{/if}
-			<RailViz
-				{map}
-				{bounds}
-				{zoom}
-				colorMode={colorMode === 'rt' || colorMode === 'route' || colorMode === 'mode'
-					? colorMode
-					: 'none'}
-			/>
+			{#await import('$lib/RailViz.svelte') then { default: RailViz }}
+				<RailViz
+					{map}
+					{bounds}
+					{zoom}
+					colorMode={colorMode === 'rt' || colorMode === 'route' || colorMode === 'mode'
+						? colorMode
+						: 'none'}
+				/>
+			{/await}
 			<Isochrones
 				{map}
 				{isochronesData}

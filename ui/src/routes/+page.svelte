@@ -43,7 +43,6 @@
 	import { preprocessItinerary, updateItinerary } from '$lib/preprocessItinerary';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import DeparturesMask from '$lib/DeparturesMask.svelte';
-	import Isochrones from '$lib/map/Isochrones.svelte';
 	import IsochronesInfo from '$lib/IsochronesInfo.svelte';
 	import type { IsochronesOptions, IsochronesPos } from '$lib/map/IsochronesShared';
 	import IsochronesMask from '$lib/IsochronesMask.svelte';
@@ -1242,23 +1241,21 @@
 		bind:to
 		bind:stop
 		bind:one
+		{arriveBy}
+		{isochronesData}
+		{isochronesOptions}
+		{maxPostTransitTime}
+		{maxPreTransitTime}
+		{maxTravelTime}
+		{pedestrianProfile}
+		{postTransitModes}
+		{preTransitModes}
 		{serverConfig}
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
 	>
 		{#if showMap}
-			<Isochrones
-				{map}
-				{isochronesData}
-				streetModes={arriveBy ? preTransitModes : postTransitModes}
-				wheelchair={pedestrianProfile === 'WHEELCHAIR'}
-				maxAllTime={arriveBy ? maxPreTransitTime : maxPostTransitTime}
-				{maxTravelTime}
-				active={activeTab == 'isochrones'}
-				options={isochronesOptions}
-			/>
-
 			{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
 				{#each routingResponses as r, rI (rI)}
 					{#await r then r}

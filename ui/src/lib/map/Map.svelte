@@ -20,6 +20,7 @@
 		Compass
 	} from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
+	import Isochrones from '$lib/map/Isochrones.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
 	import Rentals from '$lib/map/rentals/Rentals.svelte';
@@ -62,6 +63,15 @@
 		stop = $bindable(),
 		one = $bindable(),
 		stopMarker = $bindable(),
+		arriveBy,
+		isochronesData,
+		isochronesOptions,
+		maxPostTransitTime,
+		maxPreTransitTime,
+		maxTravelTime,
+		pedestrianProfile,
+		postTransitModes,
+		preTransitModes,
 		serverConfig,
 		children,
 		class: className
@@ -373,6 +383,16 @@
 					: 'none'}
 			/>
 		{/await}
+		<Isochrones
+			{map}
+			{isochronesData}
+			streetModes={arriveBy ? preTransitModes : postTransitModes}
+			wheelchair={pedestrianProfile === 'WHEELCHAIR'}
+			maxAllTime={arriveBy ? maxPreTransitTime : maxPostTransitTime}
+			{maxTravelTime}
+			active={activeTab == 'isochrones'}
+			options={isochronesOptions}
+		/>
 
 		<Popup trigger="contextmenu" children={contextMenu} />
 

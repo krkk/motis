@@ -8,7 +8,7 @@
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
 
-	import { Palette, Rss, Ban, MapPin, TrainFront, Waypoints } from '@lucide/svelte';
+	import { Palette, Rss, Ban, LocateFixed, MapPin, TrainFront, Waypoints, MountainSnow, Compass } from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
@@ -31,7 +31,6 @@
 		zoom = $bindable(),
 		bounds = $bindable(),
 		center = $bindable(),
-		bearing = $bindable(),
 		level = $bindable(),
 		style,
 		attribution,
@@ -59,7 +58,6 @@
 		transformRequest?: maplibregl.RequestTransformFunction;
 		center: maplibregl.LngLatLike;
 		bounds?: maplibregl.LngLatBoundsLike | undefined;
-		bearing?: number | undefined;
 		zoom: number;
 		level: number;
 		hasDebug: boolean;
@@ -81,6 +79,7 @@
 	let touchLocation = $state<{ x: number; y: number } | null>(null);
 	setContext('map', ctx);
 
+	let bearing = $state(0);
 	let fromMarker = $state<maplibregl.Marker>();
 	let toMarker = $state<maplibregl.Marker>();
 	let oneMarker = $state<maplibregl.Marker>();
@@ -97,6 +96,17 @@
 		{ value: 'mode', label: t.colorMode.mode, icon: TrainFront },
 		{ value: 'rt', label: t.colorMode.rt, icon: Rss }
 	];
+
+	const geolocate = new maplibregl.GeolocateControl({
+		positionOptions: {
+			enableHighAccuracy: true
+		},
+		showAccuracyCircle: false,
+		trackUserLocation: true
+	});
+	const getLocation = () => {
+		geolocate.trigger();
+	};
 
 	const updateStyle = () => {
 		if (style != currStyle) {
@@ -151,6 +161,7 @@
 			});
 
 			tmp.addControl(scale, browser && window.innerWidth < 768 ? 'top-left' : 'bottom-left');
+			tmp.addControl(geolocate);
 
 			tmp.on('load', () => {
 				map = tmp;
@@ -296,6 +307,27 @@
 						{/each}
 					</Select.Content>
 				</Select.Root>
+			</Control>
+			<Control position="top-right" class="w-fit float-right pb-4">
+				<Button
+					class={bearing === 0 ? 'hidden' : null}
+					size="icon"
+					title={t.resetToNorth}
+					onclick={() => map!.resetNorth()}
+				>
+					<Compass class="w-5 h-5" />
+				</Button>
+				<Button size="icon" title={t.showMyLocation} onclick={() => getLocation()}>
+					<LocateFixed class="w-5 h-5" />
+				</Button>
+				<Button
+					size="icon"
+					title={t.toggleHillshades}
+					variant={withHillshades ? 'default' : 'outline'}
+					onclick={() => (withHillshades = !withHillshades)}
+				>
+					<MountainSnow class="w-5 h-5" />
+				</Button>
 			</Control>
 		{/if}
 

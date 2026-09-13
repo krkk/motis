@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { X, LocateFixed, MountainSnow, Compass, RefreshCw } from '@lucide/svelte';
+	import { X, RefreshCw } from '@lucide/svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { getStyle } from '$lib/map/style';
 	import Map from '$lib/map/Map.svelte';
-	import Control from '$lib/map/Control.svelte';
 	import SearchMask from '$lib/SearchMask.svelte';
 	import { parseLocation, type Location } from '$lib/Location';
 	import { Card } from '$lib/components/ui/card';
@@ -43,7 +42,6 @@
 	import { page } from '$app/state';
 	import { preprocessItinerary, updateItinerary } from '$lib/preprocessItinerary';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import * as Select from '$lib/components/ui/select';
 	import DeparturesMask from '$lib/DeparturesMask.svelte';
 	import Isochrones from '$lib/map/Isochrones.svelte';
 	import IsochronesInfo from '$lib/IsochronesInfo.svelte';
@@ -119,7 +117,6 @@
 	let level = $state(0);
 	let zoom = $state(15);
 	let bounds = $state<maplibregl.LngLatBoundsLike>();
-	let bearing = $state(0);
 	let map = $state<maplibregl.Map>();
 	let style = $derived(
 		browser
@@ -134,18 +131,6 @@
 				)
 			: undefined
 	);
-
-	const geolocate = new maplibregl.GeolocateControl({
-		positionOptions: {
-			enableHighAccuracy: true
-		},
-		showAccuracyCircle: false,
-		trackUserLocation: true
-	});
-
-	const getLocation = () => {
-		geolocate.trigger();
-	};
 
 	onMount(async () => {
 		initial().then((d) => {
@@ -962,12 +947,6 @@
 
 	$effect(() => {
 		if (map) {
-			map.addControl(geolocate);
-		}
-	});
-
-	$effect(() => {
-		if (map) {
 			if (page.state.selectedItinerary && activeTab == 'connections') {
 				flyToSelectedItinerary();
 			} else if (activeTab == 'departures' && stop && stop.match) {
@@ -1251,12 +1230,11 @@
 		bind:bounds
 		bind:zoom
 		bind:center
-		bind:bearing
 		bind:level
 		{hasDebug}
 		bind:showRoutes
 		isSmallScreen={isSmallScreen.current}
-		{withHillshades}
+		bind:withHillshades
 		{dataAttributionLink}
 		{showMap}
 		bind:colorMode
@@ -1272,27 +1250,6 @@
 	>
 		{#if showMap}
 			{#if activeTab != 'isochrones'}
-				<Control position="top-right" class="w-fit float-right pb-4">
-					<Button
-						class={bearing === 0 ? 'hidden' : null}
-						size="icon"
-						title={t.resetToNorth}
-						onclick={() => map!.resetNorth()}
-					>
-						<Compass class="w-5 h-5" />
-					</Button>
-					<Button size="icon" title={t.showMyLocation} onclick={() => getLocation()}>
-						<LocateFixed class="w-5 h-5" />
-					</Button>
-					<Button
-						size="icon"
-						title={t.toggleHillshades}
-						variant={withHillshades ? 'default' : 'outline'}
-						onclick={() => (withHillshades = !withHillshades)}
-					>
-						<MountainSnow class="w-5 h-5" />
-					</Button>
-				</Control>
 				{#if showRoutes}
 					<Routes
 						{map}

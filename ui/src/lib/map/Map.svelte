@@ -8,10 +8,22 @@
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
 
-	import { Palette, Rss, Ban, LocateFixed, MapPin, TrainFront, Waypoints, MountainSnow, Compass } from '@lucide/svelte';
+	import {
+		Palette,
+		Rss,
+		Ban,
+		LocateFixed,
+		MapPin,
+		TrainFront,
+		Waypoints,
+		MountainSnow,
+		Compass
+	} from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
+	import Rentals from '$lib/map/rentals/Rentals.svelte';
+	import Routes from '$lib/map/routes/Routes.svelte';
 	import StopsView from '$lib/map/stops/StopsView.svelte';
 	import Debug from '$lib/Debug.svelte';
 	import { posToLocation } from '$lib/Location';
@@ -26,6 +38,7 @@
 	if (browser && maplibregl.getRTLTextPluginStatus() === 'unavailable') {
 		maplibregl.setRTLTextPlugin(rtlTextUrl, true);
 	}
+	type ColorMode = 'none' | 'stops' | 'rt' | 'route' | 'mode';
 	let {
 		map = $bindable(),
 		zoom = $bindable(),
@@ -38,7 +51,7 @@
 		hasDebug,
 		showRoutes = $bindable(),
 		isSmallScreen,
-		withHillshades,
+		withHillshades = $bindable(),
 		dataAttributionLink,
 		showMap,
 		colorMode = $bindable(),
@@ -49,6 +62,7 @@
 		stop = $bindable(),
 		one = $bindable(),
 		stopMarker = $bindable(),
+		serverConfig,
 		children,
 		class: className
 	}: {
@@ -66,7 +80,7 @@
 		withHillshades: boolean;
 		dataAttributionLink: string | undefined;
 		showMap: boolean;
-		colorMode: 'none' | 'stops' | 'rt' | 'route' | 'mode';
+		colorMode: ColorMode;
 		theme: 'light' | 'dark';
 		children?: Snippet;
 		class: string;
@@ -88,7 +102,6 @@
 		activeTab = tab;
 		pushState('', { activeTab: tab });
 	};
-	type ColorMode = 'none' | 'stops' | 'rt' | 'route' | 'mode';
 	const colorModeOptions: { value: ColorMode; label: string; icon: typeof Ban }[] = [
 		{ value: 'none', label: t.colorMode.none, icon: Ban },
 		{ value: 'stops', label: t.colorMode.stops, icon: MapPin },
@@ -329,6 +342,22 @@
 					<MountainSnow class="w-5 h-5" />
 				</Button>
 			</Control>
+			{#if showRoutes}
+				<Routes
+					{map}
+					{bounds}
+					{zoom}
+					shapesDebugEnabled={serverConfig?.shapesDebugEnabled === true}
+				/>
+			{/if}
+			<Rentals
+				{map}
+				{bounds}
+				{zoom}
+				{theme}
+				isSmallScreen={isSmallScreen.current}
+				debug={hasDebug}
+			/>
 		{/if}
 
 		{#if colorMode === 'stops'}

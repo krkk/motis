@@ -47,8 +47,6 @@
 	import IsochronesInfo from '$lib/IsochronesInfo.svelte';
 	import type { IsochronesOptions, IsochronesPos } from '$lib/map/IsochronesShared';
 	import IsochronesMask from '$lib/IsochronesMask.svelte';
-	import Rentals from '$lib/map/rentals/Rentals.svelte';
-	import Routes from '$lib/map/routes/Routes.svelte';
 	import {
 		getFormFactors,
 		getPrePostDirectModes,
@@ -1244,30 +1242,12 @@
 		bind:to
 		bind:stop
 		bind:one
+		{serverConfig}
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
 	>
 		{#if showMap}
-			{#if activeTab != 'isochrones'}
-				{#if showRoutes}
-					<Routes
-						{map}
-						{bounds}
-						{zoom}
-						shapesDebugEnabled={serverConfig?.shapesDebugEnabled === true}
-					/>
-				{/if}
-				<Rentals
-					{map}
-					{bounds}
-					{zoom}
-					{theme}
-					isSmallScreen={isSmallScreen.current}
-					debug={hasDebug}
-				/>
-			{/if}
-
 			<Isochrones
 				{map}
 				{isochronesData}

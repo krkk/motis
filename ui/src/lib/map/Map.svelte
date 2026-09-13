@@ -5,6 +5,7 @@
 	import { createShield } from './shield';
 	import { browser } from '$app/environment';
 	import { pushState } from '$app/navigation';
+	import { page } from '$app/state';
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
 
@@ -21,10 +22,12 @@
 	} from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
 	import Isochrones from '$lib/map/Isochrones.svelte';
+	import ItineraryGeoJson from '$lib/map/itineraries/ItineraryGeoJSON.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
 	import Rentals from '$lib/map/rentals/Rentals.svelte';
 	import Routes from '$lib/map/routes/Routes.svelte';
+	import StopGeoJSON from '$lib/map/stops/StopsGeoJSON.svelte';
 	import StopsView from '$lib/map/stops/StopsView.svelte';
 	import Debug from '$lib/Debug.svelte';
 	import { posToLocation } from '$lib/Location';
@@ -72,6 +75,8 @@
 		pedestrianProfile,
 		postTransitModes,
 		preTransitModes,
+		routingResponses,
+		onSelectItinerary,
 		serverConfig,
 		children,
 		class: className
@@ -393,6 +398,29 @@
 			active={activeTab == 'isochrones'}
 			options={isochronesOptions}
 		/>
+
+		{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
+			{#each routingResponses as r, rI (rI)}
+				{#await r then r}
+					{#each r.itineraries as it, i (i)}
+						<ItineraryGeoJson
+							itinerary={it}
+							id="{rI}-{i}"
+							selected={false}
+							selectItinerary={() => {
+								onSelectItinerary(it);
+							}}
+							{level}
+							{theme}
+						/>
+					{/each}
+				{/await}
+			{/each}
+		{/if}
+		{#if activeTab == 'connections' && page.state.selectedItinerary}
+			<ItineraryGeoJson itinerary={page.state.selectedItinerary} selected={true} {level} {theme} />
+			<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
+		{/if}
 
 		<Popup trigger="contextmenu" children={contextMenu} />
 

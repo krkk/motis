@@ -28,7 +28,6 @@
 	import ItineraryList from '$lib/ItineraryList.svelte';
 	import ConnectionDetail from '$lib/ConnectionDetail.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import ItineraryGeoJson from '$lib/map/itineraries/ItineraryGeoJSON.svelte';
 	import maplibregl from 'maplibre-gl';
 	import { browser } from '$app/environment';
 	import { getUrlArray, onClickStop, onClickTrip, pushStateWithQueryString } from '$lib/utils';
@@ -54,7 +53,6 @@
 		type PrePostDirectMode
 	} from '$lib/Modes';
 	import { defaultQuery, omitDefaults } from '$lib/defaults';
-	import StopGeoJSON from '$lib/map/stops/StopsGeoJSON.svelte';
 	import { formatDate } from '$lib/toDateTime';
 	import { getPageTitle } from '$lib/pageTitle';
 
@@ -1250,40 +1248,11 @@
 		{pedestrianProfile}
 		{postTransitModes}
 		{preTransitModes}
+		{routingResponses}
+		{onSelectItinerary}
 		{serverConfig}
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
-	>
-		{#if showMap}
-			{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
-				{#each routingResponses as r, rI (rI)}
-					{#await r then r}
-						{#each r.itineraries as it, i (i)}
-							<ItineraryGeoJson
-								itinerary={it}
-								id="{rI}-{i}"
-								selected={false}
-								selectItinerary={() => {
-									onSelectItinerary(it);
-								}}
-								{level}
-								{theme}
-							/>
-						{/each}
-					{/await}
-				{/each}
-			{/if}
-
-			{#if activeTab == 'connections' && page.state.selectedItinerary}
-				<ItineraryGeoJson
-					itinerary={page.state.selectedItinerary}
-					selected={true}
-					{level}
-					{theme}
-				/>
-				<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
-			{/if}
-		{/if}
-	</Map>
+	/>
 {/if}

@@ -251,8 +251,7 @@
 			language: getUrlArray('language', [language]),
 			transitModes: transitModesUrl.length ? (transitModesUrl as Mode[]) : undefined,
 			pedestrianProfile: (urlParams?.get('pedestrianProfile') ?? undefined) as
-				| PedestrianProfile
-				| undefined,
+				PedestrianProfile | undefined,
 			useRoutedTransfers: boolParam('useRoutedTransfers'),
 			requireBikeTransport: boolParam('requireBikeTransport'),
 			requireCarTransport: boolParam('requireCarTransport'),
@@ -260,11 +259,9 @@
 			preTransitModes: arrParam('preTransitModes') as Mode[] | undefined,
 			postTransitModes: arrParam('postTransitModes') as Mode[] | undefined,
 			preTransitRentalFormFactors: arrParam('preTransitRentalFormFactors') as
-				| RentalFormFactor[]
-				| undefined,
+				RentalFormFactor[] | undefined,
 			postTransitRentalFormFactors: arrParam('postTransitRentalFormFactors') as
-				| RentalFormFactor[]
-				| undefined,
+				RentalFormFactor[] | undefined,
 			preTransitRentalProviderGroups: arrParam('preTransitRentalProviderGroups'),
 			postTransitRentalProviderGroups: arrParam('postTransitRentalProviderGroups'),
 			ignorePreTransitRentalReturnConstraints: boolParam('ignorePreTransitRentalReturnConstraints'),

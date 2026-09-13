@@ -8,6 +8,7 @@
 	import { page } from '$app/state';
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
+	import type { Itinerary } from '@motis-project/motis-client';
 
 	import {
 		Palette,
@@ -22,6 +23,7 @@
 	} from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
 	import Isochrones from '$lib/map/Isochrones.svelte';
+	import type { IsochronesPos } from '$lib/map/IsochronesShared';
 	import ItineraryGeoJson from '$lib/map/itineraries/ItineraryGeoJSON.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
@@ -32,6 +34,7 @@
 	import Debug from '$lib/Debug.svelte';
 	import { posToLocation } from '$lib/Location';
 	import LevelSelect from '$lib/LevelSelect.svelte';
+	import RailViz from '$lib/RailViz.svelte';
 	import { LEVEL_MIN_ZOOM } from '$lib/constants';
 	import { Button } from '$lib/components/ui/button';
 	import * as Select from '$lib/components/ui/select';
@@ -134,6 +137,47 @@
 	});
 	const getLocation = () => {
 		geolocate.trigger();
+	};
+
+	export function flyToItineraries(itineraries: Itinerary[], map: maplibregl.Map) {
+		const start = maplibregl.LngLat.convert(itineraries[0].legs[0].from);
+		const box = new maplibregl.LngLatBounds(start, start);
+		itineraries.forEach((i) => {
+			i.legs.forEach((l) => {
+				box.extend(l.from);
+				box.extend(l.to);
+				l.intermediateStops?.forEach((x) => {
+					box.extend(x);
+				});
+			});
+		});
+		map.flyTo({
+			...map.cameraForBounds(box, {
+				padding: {
+					top: 96,
+					right: 96,
+					bottom: isSmallScreen.current ? window.innerHeight * 0.3 : 96,
+					left: isSmallScreen.current ? 96 : 640
+				}
+			})
+		});
+	};
+
+	// Show the whole reachable area instead of zooming onto the start position.
+	// A few long distance stops can reach much further than everything else, so
+	// the outermost places are trimmed away before fitting.
+	const ISOCHRONES_FIT_TRIM = 0.02;
+	export function isochronesBounds(data: IsochronesPos[]) {
+		const lngs = data.map((p) => p.lng).sort((a, b) => a - b);
+		const lats = data.map((p) => p.lat).sort((a, b) => a - b);
+		const lo = Math.floor(lngs.length * ISOCHRONES_FIT_TRIM);
+		const hi = lngs.length - 1 - lo;
+		return lo < hi
+			? new maplibregl.LngLatBounds([lngs[lo], lats[lo]], [lngs[hi], lats[hi]])
+			: new maplibregl.LngLatBounds(
+					[lngs[0], lats[0]],
+					[lngs[lngs.length - 1], lats[lats.length - 1]]
+				);
 	};
 
 	const updateStyle = () => {
@@ -378,16 +422,14 @@
 		{#if colorMode === 'stops'}
 			<StopsView {map} {bounds} {zoom} {level} {theme} />
 		{/if}
-		{#await import('$lib/RailViz.svelte') then { default: RailViz }}
-			<RailViz
-				{map}
-				{bounds}
-				{zoom}
-				colorMode={colorMode === 'rt' || colorMode === 'route' || colorMode === 'mode'
-					? colorMode
-					: 'none'}
-			/>
-		{/await}
+		<RailViz
+			{map}
+			{bounds}
+			{zoom}
+			colorMode={colorMode === 'rt' || colorMode === 'route' || colorMode === 'mode'
+				? colorMode
+				: 'none'}
+		/>
 		<Isochrones
 			{map}
 			{isochronesData}

@@ -2,7 +2,6 @@
 	import { X, RefreshCw } from '@lucide/svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { getStyle } from '$lib/map/style';
-	import Map from '$lib/map/Map.svelte';
 	import SearchMask from '$lib/SearchMask.svelte';
 	import { parseLocation, type Location } from '$lib/Location';
 	import { Card } from '$lib/components/ui/card';
@@ -28,7 +27,7 @@
 	import ItineraryList from '$lib/ItineraryList.svelte';
 	import ConnectionDetail from '$lib/ConnectionDetail.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import maplibregl from 'maplibre-gl';
+	import type maplibregl from 'maplibre-gl';
 	import { browser } from '$app/environment';
 	import { getUrlArray, onClickStop, onClickTrip, pushStateWithQueryString } from '$lib/utils';
 	import { lngLatToStr } from '$lib/lngLatToStr';
@@ -113,6 +112,7 @@
 	let zoom = $state(15);
 	let bounds = $state<maplibregl.LngLatBoundsLike>();
 	let map = $state<maplibregl.Map>();
+	let mapData;
 	let style = $derived(
 		browser
 			? getStyle(
@@ -863,30 +863,6 @@
 		});
 	}
 
-	const flyToItineraries = (itineraries: Itinerary[], map: maplibregl.Map) => {
-		const start = maplibregl.LngLat.convert(itineraries[0].legs[0].from);
-		const box = new maplibregl.LngLatBounds(start, start);
-		itineraries.forEach((i) => {
-			i.legs.forEach((l) => {
-				box.extend(l.from);
-				box.extend(l.to);
-				l.intermediateStops?.forEach((x) => {
-					box.extend(x);
-				});
-			});
-		});
-		map.flyTo({
-			...map.cameraForBounds(box, {
-				padding: {
-					top: 96,
-					right: 96,
-					bottom: isSmallScreen.current ? window.innerHeight * 0.3 : 96,
-					left: isSmallScreen.current ? 96 : 640
-				}
-			})
-		});
-	};
-
 	let lastFlownTo: Match | undefined = undefined;
 	const flyToLocation = (location: Location, zoom: number = 18) => {
 		if (location.match == lastFlownTo) {
@@ -896,30 +872,13 @@
 		map?.flyTo({ center: location.match, zoom });
 	};
 
-	// Show the whole reachable area instead of zooming onto the start position.
-	// A few long distance stops can reach much further than everything else, so
-	// the outermost places are trimmed away before fitting.
-	const ISOCHRONES_FIT_TRIM = 0.02;
-	const isochronesBounds = (data: IsochronesPos[]) => {
-		const lngs = data.map((p) => p.lng).sort((a, b) => a - b);
-		const lats = data.map((p) => p.lat).sort((a, b) => a - b);
-		const lo = Math.floor(lngs.length * ISOCHRONES_FIT_TRIM);
-		const hi = lngs.length - 1 - lo;
-		return lo < hi
-			? new maplibregl.LngLatBounds([lngs[lo], lats[lo]], [lngs[hi], lats[hi]])
-			: new maplibregl.LngLatBounds(
-					[lngs[0], lats[0]],
-					[lngs[lngs.length - 1], lats[lats.length - 1]]
-				);
-	};
-
 	let lastFittedIsochrones: IsochronesPos[] | undefined = undefined;
 	const flyToIsochrones = (data: IsochronesPos[], map: maplibregl.Map) => {
 		if (data === lastFittedIsochrones) {
 			return;
 		}
 		lastFittedIsochrones = data;
-		const box = isochronesBounds(data);
+		const box = mapData.isochronesBounds(data);
 		const camera = map.cameraForBounds(box, {
 			maxZoom: 15, // keeps a single reachable place from zooming to street level
 			padding: {
@@ -936,7 +895,7 @@
 
 	const flyToSelectedItinerary = () => {
 		if (page.state.selectedItinerary && map) {
-			flyToItineraries([page.state.selectedItinerary], map);
+			mapData.flyToItineraries([page.state.selectedItinerary], map);
 		}
 	};
 
@@ -965,7 +924,7 @@
 			if (map) {
 				let it = responses.flatMap((response) => response.itineraries);
 				if (it.length !== 0) {
-					flyToItineraries(it, map);
+					mapData.flyToItineraries(it, map);
 				}
 			}
 		});
@@ -1220,39 +1179,42 @@
 {/if}
 
 {#if dataLoaded}
-	<Map
-		bind:map
-		bind:bounds
-		bind:zoom
-		bind:center
-		bind:level
-		{hasDebug}
-		bind:showRoutes
-		isSmallScreen={isSmallScreen.current}
-		bind:withHillshades
-		{dataAttributionLink}
-		{showMap}
-		bind:colorMode
-		{theme}
-		bind:activeTab
-		bind:from
-		bind:to
-		bind:stop
-		bind:one
-		{arriveBy}
-		{isochronesData}
-		{isochronesOptions}
-		{maxPostTransitTime}
-		{maxPreTransitTime}
-		{maxTravelTime}
-		{pedestrianProfile}
-		{postTransitModes}
-		{preTransitModes}
-		{routingResponses}
-		{onSelectItinerary}
-		{serverConfig}
-		class="h-dvh pt-2 overflow-clip"
-		style={showMap ? style : undefined}
-		attribution={false}
-	/>
+	{#await import('$lib/map/Map.svelte') then { default: Map }}
+		<Map
+			bind:this={mapData}
+			bind:map
+			bind:bounds
+			bind:zoom
+			bind:center
+			bind:level
+			{hasDebug}
+			bind:showRoutes
+			isSmallScreen={isSmallScreen.current}
+			bind:withHillshades
+			{dataAttributionLink}
+			{showMap}
+			bind:colorMode
+			{theme}
+			bind:activeTab
+			bind:from
+			bind:to
+			bind:stop
+			bind:one
+			{arriveBy}
+			{isochronesData}
+			{isochronesOptions}
+			{maxPostTransitTime}
+			{maxPreTransitTime}
+			{maxTravelTime}
+			{pedestrianProfile}
+			{postTransitModes}
+			{preTransitModes}
+			{routingResponses}
+			{onSelectItinerary}
+			{serverConfig}
+			class="h-dvh pt-2 overflow-clip"
+			style={showMap ? style : undefined}
+			attribution={false}
+		/>
+	{/await}
 {/if}

@@ -16,7 +16,7 @@
 	import Map from '$lib/map/Map.svelte';
 	import Control from '$lib/map/Control.svelte';
 	import SearchMask from '$lib/SearchMask.svelte';
-	import { parseLocation, posToLocation, type Location } from '$lib/Location';
+	import { parseLocation, type Location } from '$lib/Location';
 	import { Card } from '$lib/components/ui/card';
 	import {
 		initial,
@@ -44,8 +44,6 @@
 	import maplibregl from 'maplibre-gl';
 	import { browser } from '$app/environment';
 	import { getUrlArray, onClickStop, onClickTrip, pushStateWithQueryString } from '$lib/utils';
-	import Marker from '$lib/map/Marker.svelte';
-	import Popup from '$lib/map/Popup.svelte';
 	import { lngLatToStr } from '$lib/lngLatToStr';
 	import Drawer from '$lib/map/Drawer.svelte';
 	import { client } from '@motis-project/motis-client';
@@ -72,7 +70,6 @@
 		type PrePostDirectMode
 	} from '$lib/Modes';
 	import { defaultQuery, omitDefaults } from '$lib/defaults';
-	import { LEVEL_MIN_ZOOM } from '$lib/constants';
 	import StopGeoJSON from '$lib/map/stops/StopsGeoJSON.svelte';
 	import { formatDate } from '$lib/toDateTime';
 	import { getPageTitle } from '$lib/pageTitle';
@@ -373,9 +370,6 @@
 
 	let advancedOptionsOpen = $state<boolean>(false);
 	let isochronesAdvancedOptionsOpen = $state<boolean>(false);
-	let fromMarker = $state<maplibregl.Marker>();
-	let toMarker = $state<maplibregl.Marker>();
-	let oneMarker = $state<maplibregl.Marker>();
 	let stopMarker = $state<maplibregl.Marker>();
 	let from = $state<Location>(
 		parseLocation(
@@ -1020,49 +1014,12 @@
 			}
 		});
 	});
-	type CloseFn = () => void;
 </script>
 
 <svelte:head>
 	<title>{pageTitle}</title>
 </svelte:head>
 
-{#snippet contextMenu(e: maplibregl.MapMouseEvent, close: CloseFn)}
-	{#if activeTab == 'isochrones'}
-		<Button
-			variant="outline"
-			onclick={() => {
-				one = posToLocation(e.lngLat, zoom > LEVEL_MIN_ZOOM ? level : undefined);
-				oneMarker?.setLngLat(one.match!);
-				close();
-			}}
-		>
-			{t.position}
-		</Button>
-	{/if}
-	<Button
-		variant="outline"
-		onclick={() => {
-			from = posToLocation(e.lngLat, zoom > LEVEL_MIN_ZOOM ? level : undefined);
-			fromMarker?.setLngLat(from.match!);
-			setActiveTab('connections');
-			close();
-		}}
-	>
-		From
-	</Button>
-	<Button
-		variant="outline"
-		onclick={() => {
-			to = posToLocation(e.lngLat, zoom > LEVEL_MIN_ZOOM ? level : undefined);
-			toMarker?.setLngLat(to.match!);
-			setActiveTab('connections');
-			close();
-		}}
-	>
-		To
-	</Button>
-{/snippet}
 {#snippet resultContent()}
 	<div class="min-h-0 shrink-0 overflow-hidden">
 		<Tabs.Root
@@ -1322,6 +1279,11 @@
 		{showMap}
 		{colorMode}
 		{theme}
+		bind:activeTab
+		bind:from
+		bind:to
+		bind:stop
+		bind:one
 		class="h-dvh pt-2 overflow-clip"
 		style={showMap ? style : undefined}
 		attribution={false}
@@ -1399,8 +1361,6 @@
 				options={isochronesOptions}
 			/>
 
-			<Popup trigger="contextmenu" children={contextMenu} />
-
 			{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
 				{#each routingResponses as r, rI (rI)}
 					{#await r then r}
@@ -1421,42 +1381,13 @@
 			{/if}
 
 			{#if activeTab == 'connections' && page.state.selectedItinerary}
-					<ItineraryGeoJson itinerary={page.state.selectedItinerary} selected={true} {level} {theme} />
-					<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
-			{/if}
-
-			{#if from && activeTab == 'connections'}
-				<Marker
-					color="green"
-					draggable={true}
+				<ItineraryGeoJson
+					itinerary={page.state.selectedItinerary}
+					selected={true}
 					{level}
-					bind:location={from}
-					bind:marker={fromMarker}
+					{theme}
 				/>
-			{/if}
-
-			{#if stop && activeTab == 'departures'}
-				<Marker
-					color="black"
-					draggable={false}
-					{level}
-					bind:location={stop}
-					bind:marker={stopMarker}
-				/>
-			{/if}
-
-			{#if to && activeTab == 'connections'}
-				<Marker color="red" draggable={true} {level} bind:location={to} bind:marker={toMarker} />
-			{/if}
-
-			{#if one && activeTab == 'isochrones'}
-				<Marker
-					color="yellow"
-					draggable={true}
-					{level}
-					bind:location={one}
-					bind:marker={oneMarker}
-				/>
+				<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
 			{/if}
 		{/if}
 	</Map>

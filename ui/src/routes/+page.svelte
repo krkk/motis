@@ -1,16 +1,5 @@
 <script lang="ts">
-	import {
-		X,
-		Palette,
-		Rss,
-		Ban,
-		LocateFixed,
-		MapPin,
-		TrainFront,
-		MountainSnow,
-		Compass,
-		RefreshCw
-	} from '@lucide/svelte';
+	import { X, LocateFixed, MountainSnow, Compass, RefreshCw } from '@lucide/svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { getStyle } from '$lib/map/style';
 	import Map from '$lib/map/Map.svelte';
@@ -95,13 +84,6 @@
 	let dataAttributionLink: string | undefined = $state(undefined);
 	type ColorMode = 'none' | 'stops' | 'rt' | 'route' | 'mode';
 	let colorMode = $state<ColorMode>('stops');
-	const colorModeOptions: { value: ColorMode; label: string; icon: typeof Ban }[] = [
-		{ value: 'none', label: t.colorMode.none, icon: Ban },
-		{ value: 'stops', label: t.colorMode.stops, icon: MapPin },
-		{ value: 'route', label: t.colorMode.route, icon: Palette },
-		{ value: 'mode', label: t.colorMode.mode, icon: TrainFront },
-		{ value: 'rt', label: t.colorMode.rt, icon: Rss }
-	];
 	let showMap = $state(!isSmallScreen.current);
 	let showRoutes = $state(false);
 	let lastOneToAllQuery: Parameters<typeof oneToAll>[0] | undefined = undefined;
@@ -1277,7 +1259,7 @@
 		{withHillshades}
 		{dataAttributionLink}
 		{showMap}
-		{colorMode}
+		bind:colorMode
 		{theme}
 		bind:activeTab
 		bind:from
@@ -1290,27 +1272,6 @@
 	>
 		{#if showMap}
 			{#if activeTab != 'isochrones'}
-				<Control position="top-right" class="w-fit float-right">
-					{@const selectedColorMode = colorModeOptions.find((o) => o.value == colorMode)}
-					<Select.Root type="single" bind:value={colorMode} items={colorModeOptions}>
-						<Select.Trigger class="bg-background w-40 gap-2">
-							{#if selectedColorMode}
-								{@const Icon = selectedColorMode.icon}
-								<Icon class="h-[1.2rem] w-[1.2rem]" />
-								<span class="grow text-left">{selectedColorMode.label}</span>
-							{/if}
-						</Select.Trigger>
-						<Select.Content align="end">
-							{#each colorModeOptions as option (option.value)}
-								{@const Icon = option.icon}
-								<Select.Item value={option.value} label={option.label} class="gap-2">
-									<Icon class="h-[1.2rem] w-[1.2rem]" />
-									{option.label}
-								</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</Control>
 				<Control position="top-right" class="w-fit float-right pb-4">
 					<Button
 						class={bearing === 0 ? 'hidden' : null}

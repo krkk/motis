@@ -8,7 +8,7 @@
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
 
-	import { Waypoints } from '@lucide/svelte';
+	import { Palette, Rss, Ban, MapPin, TrainFront, Waypoints } from '@lucide/svelte';
 	import Control from '$lib/map/Control.svelte';
 	import Marker from '$lib/map/Marker.svelte';
 	import Popup from '$lib/map/Popup.svelte';
@@ -18,6 +18,7 @@
 	import LevelSelect from '$lib/LevelSelect.svelte';
 	import { LEVEL_MIN_ZOOM } from '$lib/constants';
 	import { Button } from '$lib/components/ui/button';
+	import * as Select from '$lib/components/ui/select';
 	import { t } from '$lib/i18n/translation';
 
 	// required for correct rendering of RTL scripts (Arabic, Hebrew, ...);
@@ -41,7 +42,7 @@
 		withHillshades,
 		dataAttributionLink,
 		showMap,
-		colorMode,
+		colorMode = $bindable(),
 		theme,
 		activeTab = $bindable(),
 		from = $bindable(),
@@ -88,6 +89,14 @@
 		activeTab = tab;
 		pushState('', { activeTab: tab });
 	};
+	type ColorMode = 'none' | 'stops' | 'rt' | 'route' | 'mode';
+	const colorModeOptions: { value: ColorMode; label: string; icon: typeof Ban }[] = [
+		{ value: 'none', label: t.colorMode.none, icon: Ban },
+		{ value: 'stops', label: t.colorMode.stops, icon: MapPin },
+		{ value: 'route', label: t.colorMode.route, icon: Palette },
+		{ value: 'mode', label: t.colorMode.mode, icon: TrainFront },
+		{ value: 'rt', label: t.colorMode.rt, icon: Rss }
+	];
 
 	const updateStyle = () => {
 		if (style != currStyle) {
@@ -266,6 +275,30 @@
 	</div>
 
 	{#if showMap}
+		{#if activeTab != 'isochrones'}
+			<Control position="top-right" class="w-fit float-right">
+				{@const selectedColorMode = colorModeOptions.find((o) => o.value == colorMode)}
+				<Select.Root type="single" bind:value={colorMode} items={colorModeOptions}>
+					<Select.Trigger class="bg-background w-40 gap-2">
+						{#if selectedColorMode}
+							{@const Icon = selectedColorMode.icon}
+							<Icon class="h-[1.2rem] w-[1.2rem]" />
+							<span class="grow text-left">{selectedColorMode.label}</span>
+						{/if}
+					</Select.Trigger>
+					<Select.Content align="end">
+						{#each colorModeOptions as option (option.value)}
+							{@const Icon = option.icon}
+							<Select.Item value={option.value} label={option.label} class="gap-2">
+								<Icon class="h-[1.2rem] w-[1.2rem]" />
+								{option.label}
+							</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</Control>
+		{/if}
+
 		{#if colorMode === 'stops'}
 			<StopsView {map} {bounds} {zoom} {level} {theme} />
 		{/if}

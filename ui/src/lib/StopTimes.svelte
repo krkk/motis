@@ -16,7 +16,7 @@
 	import { getModeLabel } from './map/getModeLabel';
 	import { posToLocation } from './Location';
 	import type { Location } from './Location';
-	import maplibregl from 'maplibre-gl';
+	import type maplibregl from 'maplibre-gl';
 	import Alerts from './Alerts.svelte';
 
 	let {
@@ -63,9 +63,10 @@
 			}
 			stopNameFromResponse = response.data?.place?.name || '';
 			let placeFromResponse = response.data?.place;
-			stop = posToLocation(
-				maplibregl.LngLat.convert([placeFromResponse.lon, placeFromResponse.lat])
-			);
+			// FIXME:
+			//stop = posToLocation(
+			//	maplibregl.LngLat.convert([placeFromResponse.lon, placeFromResponse.lat])
+			//);
 			stopMarker?.setLngLat(stop.match!);
 			return response.data!;
 		});

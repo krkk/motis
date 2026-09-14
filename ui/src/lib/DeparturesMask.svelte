@@ -1,6 +1,6 @@
 <script lang="ts">
 	import AddressTypeahead from '$lib/AddressTypeahead.svelte';
-	import { type Location } from '$lib/Location';
+	import type { Location } from '$lib/Location';
 	import { t } from '$lib/i18n/translation';
 	import { onClickStop } from '$lib/utils';
 

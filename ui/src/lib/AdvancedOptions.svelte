@@ -25,7 +25,7 @@
 	import NumberSelect from '$lib/NumberSelect.svelte';
 	import StreetModes from '$lib/StreetModes.svelte';
 	import TransitModeSelect from '$lib/TransitModeSelect.svelte';
-	import { type NumberSelectOption } from '$lib/NumberSelect.svelte';
+	import type { NumberSelectOption } from '$lib/NumberSelect.svelte';
 	import { generateTimes } from './generateTimes';
 	import ViaStopOptions from './ViaStopOptions.svelte';
 	import Slider from './components/ui/slider/Slider.svelte';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type maplibregl from 'maplibre-gl';
-	import GeoJSON from 'geojson';
+	import type GeoJSON from 'geojson';
 	import { getContext, onDestroy, setContext, type Snippet } from 'svelte';
 
 	class Props {

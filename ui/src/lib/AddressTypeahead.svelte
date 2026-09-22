@@ -4,7 +4,7 @@
 	import { MapPinHouse as House, MapPin as Place } from '@lucide/svelte';
 	import { parseCoordinatesToLocation, type Location } from './Location';
 	import { language } from './i18n/translation';
-	import maplibregl from 'maplibre-gl';
+	import type maplibregl from 'maplibre-gl';
 	import { getModeStyle, type LegLike } from './modeStyle';
 
 	let {
@@ -71,7 +71,8 @@
 			return;
 		}
 
-		const pos = place ? maplibregl.LngLat.convert(place) : undefined;
+		//const pos = place ? maplibregl.LngLat.convert(place) : undefined;
+		const pos = place;
 		const biasPlace = pos ? { place: `${pos.lat},${pos.lng}` } : {};
 		const { data: matches, error } = await geocode({
 			query: {

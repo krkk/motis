@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl';
+import type maplibregl from 'maplibre-gl';
 import type { Match } from '@motis-project/motis-client';
 
 const COORD_LVL_REGEX = /^([+-]?\d+(\.\d+)?)\s*,\s*([+-]?\d+(\.\d+)?)\s*,\s*([+-]?\d+(\.\d+)?)$/;
@@ -30,7 +30,7 @@ export const parseCoordinatesToLocation = (str?: string): Location | undefined =
 };
 
 export function posToLocation(pos: maplibregl.LngLatLike, level?: number): Location {
-	const { lat, lng } = maplibregl.LngLat.convert(pos);
+	const { lat, lng } = pos;
 	const label = level == undefined ? `${lat},${lng}` : `${lat},${lng},${level}`;
 	return {
 		label,

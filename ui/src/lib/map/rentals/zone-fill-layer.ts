@@ -1,7 +1,7 @@
 import earcut from 'earcut';
 import { flatten } from 'earcut';
 import maplibregl from 'maplibre-gl';
-import { type CustomRenderMethodInput, type Map as MapLibreMap, type PointLike } from 'maplibre-gl';
+import type { CustomRenderMethodInput, Map as MapLibreMap, PointLike } from 'maplibre-gl';
 import type { Position } from 'geojson';
 
 import type { RentalZoneFeature, RentalZoneFeatureProperties } from './zone-types';

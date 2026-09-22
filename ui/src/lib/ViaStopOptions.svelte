@@ -31,12 +31,10 @@
 		stay: number;
 	};
 	let vias = $state<Via[]>(
-		via?.map(
-			(_, i): Via => ({
-				match: via![i],
-				stay: viaMinimumStay?.[i] ?? 0
-			})
-		) ?? []
+		via?.map((_, i): Via => ({
+			match: via![i],
+			stay: viaMinimumStay?.[i] ?? 0
+		})) ?? []
 	);
 	const add = () => {
 		vias.push({ stay: 0, match: { label: '', match: undefined } });

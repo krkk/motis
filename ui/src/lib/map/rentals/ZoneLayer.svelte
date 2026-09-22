@@ -1,5 +1,5 @@
 <script lang="ts">
-	import maplibregl from 'maplibre-gl';
+	import type maplibregl from 'maplibre-gl';
 	import type { PointLike } from 'maplibre-gl';
 	import { getContext, onDestroy } from 'svelte';
 

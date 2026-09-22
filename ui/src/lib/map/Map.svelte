@@ -4,23 +4,83 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import { createShield } from './shield';
 	import { browser } from '$app/environment';
+	import { pushState } from '$app/navigation';
+	import { page } from '$app/state';
 	// pinned to 0.2.3 — 0.4.0's `exports` field blocks deep-importing the worker script
 	import rtlTextUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?url';
+	import type { Itinerary } from '@motis-project/motis-client';
+
+	import {
+		Palette,
+		Rss,
+		Ban,
+		LocateFixed,
+		MapPin,
+		TrainFront,
+		Waypoints,
+		MountainSnow,
+		Compass
+	} from '@lucide/svelte';
+	import Control from '$lib/map/Control.svelte';
+	import Isochrones from '$lib/map/Isochrones.svelte';
+	import type { IsochronesPos } from '$lib/map/IsochronesShared';
+	import ItineraryGeoJson from '$lib/map/itineraries/ItineraryGeoJSON.svelte';
+	import Marker from '$lib/map/Marker.svelte';
+	import Popup from '$lib/map/Popup.svelte';
+	import Rentals from '$lib/map/rentals/Rentals.svelte';
+	import Routes from '$lib/map/routes/Routes.svelte';
+	import StopGeoJSON from '$lib/map/stops/StopsGeoJSON.svelte';
+	import StopsView from '$lib/map/stops/StopsView.svelte';
+	import Debug from '$lib/Debug.svelte';
+	import { posToLocation } from '$lib/Location';
+	import LevelSelect from '$lib/LevelSelect.svelte';
+	import RailViz from '$lib/RailViz.svelte';
+	import { LEVEL_MIN_ZOOM } from '$lib/constants';
+	import { Button } from '$lib/components/ui/button';
+	import * as Select from '$lib/components/ui/select';
+	import { t } from '$lib/i18n/translation';
 
 	// required for correct rendering of RTL scripts (Arabic, Hebrew, ...);
 	// lazy: only loaded once RTL text is actually encountered
 	if (browser && maplibregl.getRTLTextPluginStatus() === 'unavailable') {
 		maplibregl.setRTLTextPlugin(rtlTextUrl, true);
 	}
+	type ColorMode = 'none' | 'stops' | 'rt' | 'route' | 'mode';
 	let {
 		map = $bindable(),
 		zoom = $bindable(),
 		bounds = $bindable(),
 		center = $bindable(),
-		bearing = $bindable(),
+		level = $bindable(),
 		style,
 		attribution,
 		transformRequest,
+		hasDebug,
+		showRoutes = $bindable(),
+		isSmallScreen,
+		withHillshades = $bindable(),
+		dataAttributionLink,
+		showMap,
+		colorMode = $bindable(),
+		theme,
+		activeTab = $bindable(),
+		from = $bindable(),
+		to = $bindable(),
+		stop = $bindable(),
+		one = $bindable(),
+		stopMarker = $bindable(),
+		arriveBy,
+		isochronesData,
+		isochronesOptions,
+		maxPostTransitTime,
+		maxPreTransitTime,
+		maxTravelTime,
+		pedestrianProfile,
+		postTransitModes,
+		preTransitModes,
+		routingResponses,
+		onSelectItinerary,
+		serverConfig,
 		children,
 		class: className
 	}: {
@@ -30,8 +90,16 @@
 		transformRequest?: maplibregl.RequestTransformFunction;
 		center: maplibregl.LngLatLike;
 		bounds?: maplibregl.LngLatBoundsLike | undefined;
-		bearing?: number | undefined;
 		zoom: number;
+		level: number;
+		hasDebug: boolean;
+		showRoutes: boolean;
+		isSmallScreen: boolean;
+		withHillshades: boolean;
+		dataAttributionLink: string | undefined;
+		showMap: boolean;
+		colorMode: ColorMode;
+		theme: 'light' | 'dark';
 		children?: Snippet;
 		class: string;
 	} = $props();
@@ -42,6 +110,75 @@
 	let touchStartTime = $state<number | null>(null);
 	let touchLocation = $state<{ x: number; y: number } | null>(null);
 	setContext('map', ctx);
+
+	let bearing = $state(0);
+	let fromMarker = $state<maplibregl.Marker>();
+	let toMarker = $state<maplibregl.Marker>();
+	let oneMarker = $state<maplibregl.Marker>();
+
+	const setActiveTab = (tab: typeof activeTab) => {
+		activeTab = tab;
+		pushState('', { activeTab: tab });
+	};
+	const colorModeOptions: { value: ColorMode; label: string; icon: typeof Ban }[] = [
+		{ value: 'none', label: t.colorMode.none, icon: Ban },
+		{ value: 'stops', label: t.colorMode.stops, icon: MapPin },
+		{ value: 'route', label: t.colorMode.route, icon: Palette },
+		{ value: 'mode', label: t.colorMode.mode, icon: TrainFront },
+		{ value: 'rt', label: t.colorMode.rt, icon: Rss }
+	];
+
+	const geolocate = new maplibregl.GeolocateControl({
+		positionOptions: {
+			enableHighAccuracy: true
+		},
+		showAccuracyCircle: false,
+		trackUserLocation: true
+	});
+	const getLocation = () => {
+		geolocate.trigger();
+	};
+
+	export function flyToItineraries(itineraries: Itinerary[], map: maplibregl.Map) {
+		const start = maplibregl.LngLat.convert(itineraries[0].legs[0].from);
+		const box = new maplibregl.LngLatBounds(start, start);
+		itineraries.forEach((i) => {
+			i.legs.forEach((l) => {
+				box.extend(l.from);
+				box.extend(l.to);
+				l.intermediateStops?.forEach((x) => {
+					box.extend(x);
+				});
+			});
+		});
+		map.flyTo({
+			...map.cameraForBounds(box, {
+				padding: {
+					top: 96,
+					right: 96,
+					bottom: isSmallScreen.current ? window.innerHeight * 0.3 : 96,
+					left: isSmallScreen.current ? 96 : 640
+				}
+			})
+		});
+	};
+
+	// Show the whole reachable area instead of zooming onto the start position.
+	// A few long distance stops can reach much further than everything else, so
+	// the outermost places are trimmed away before fitting.
+	const ISOCHRONES_FIT_TRIM = 0.02;
+	export function isochronesBounds(data: IsochronesPos[]) {
+		const lngs = data.map((p) => p.lng).sort((a, b) => a - b);
+		const lats = data.map((p) => p.lat).sort((a, b) => a - b);
+		const lo = Math.floor(lngs.length * ISOCHRONES_FIT_TRIM);
+		const hi = lngs.length - 1 - lo;
+		return lo < hi
+			? new maplibregl.LngLatBounds([lngs[lo], lats[lo]], [lngs[hi], lats[hi]])
+			: new maplibregl.LngLatBounds(
+					[lngs[0], lats[0]],
+					[lngs[lngs.length - 1], lats[lats.length - 1]]
+				);
+	};
 
 	const updateStyle = () => {
 		if (style != currStyle) {
@@ -96,6 +233,7 @@
 			});
 
 			tmp.addControl(scale, browser && window.innerWidth < 768 ? 'top-left' : 'bottom-left');
+			tmp.addControl(geolocate);
 
 			tmp.on('load', () => {
 				map = tmp;
@@ -145,9 +283,215 @@
 	};
 
 	$effect(updateStyle);
+
+	type CloseFn = () => void;
 </script>
 
+{#snippet contextMenu(e: maplibregl.MapMouseEvent, close: CloseFn)}
+	{#if activeTab == 'isochrones'}
+		<Button
+			variant="outline"
+			onclick={() => {
+				one = posToLocation(e.lngLat, zoom > LEVEL_MIN_ZOOM ? level : undefined);
+				oneMarker?.setLngLat(one.match!);
+				close();
+			}}
+		>
+			{t.position}
+		</Button>
+	{/if}
+	<Button
+		variant="outline"
+		onclick={() => {
+			from = posToLocation(e.lngLat, zoom > LEVEL_MIN_ZOOM ? level : undefined);
+			fromMarker?.setLngLat(from.match!);
+			setActiveTab('connections');
+			close();
+		}}
+	>
+		From
+	</Button>
+	<Button
+		variant="outline"
+		onclick={() => {
+			to = posToLocation(e.lngLat, zoom > LEVEL_MIN_ZOOM ? level : undefined);
+			toMarker?.setLngLat(to.match!);
+			setActiveTab('connections');
+			close();
+		}}
+	>
+		To
+	</Button>
+{/snippet}
+
 <div use:createMap bind:this={el} class={className}>
+	{#if hasDebug}
+		<Control position="top-right" class="text-right">
+			<Debug {bounds} {level} {zoom} />
+			<Button
+				size="icon"
+				variant={showRoutes ? 'default' : 'outline'}
+				aria-label="Toggle routes overlay"
+				onclick={() => {
+					showRoutes = !showRoutes;
+				}}
+			>
+				<Waypoints class="w-5 h-5" />
+			</Button>
+		</Control>
+	{/if}
+
+	<LevelSelect {bounds} {zoom} bind:level />
+
+	<div class="maplibregl-ctrl-{isSmallScreen ? 'top-left' : 'bottom-right'}">
+		<div class="maplibregl-ctrl maplibregl-ctrl-attrib">
+			<div class="maplibregl-ctrl-attrib-inner">
+				&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>
+				{#if withHillshades}
+					| <a href="https://mapterhorn.com/attribution" target="_blank">Mapterhorn</a>
+				{/if}
+				{#if dataAttributionLink}
+					| <a href={dataAttributionLink} target="_blank">{t.timetableSources}</a>
+				{/if}
+			</div>
+		</div>
+	</div>
+
+	{#if showMap}
+		{#if activeTab != 'isochrones'}
+			<Control position="top-right" class="w-fit float-right">
+				{@const selectedColorMode = colorModeOptions.find((o) => o.value == colorMode)}
+				<Select.Root type="single" bind:value={colorMode} items={colorModeOptions}>
+					<Select.Trigger class="bg-background w-40 gap-2">
+						{#if selectedColorMode}
+							{@const Icon = selectedColorMode.icon}
+							<Icon class="h-[1.2rem] w-[1.2rem]" />
+							<span class="grow text-left">{selectedColorMode.label}</span>
+						{/if}
+					</Select.Trigger>
+					<Select.Content align="end">
+						{#each colorModeOptions as option (option.value)}
+							{@const Icon = option.icon}
+							<Select.Item value={option.value} label={option.label} class="gap-2">
+								<Icon class="h-[1.2rem] w-[1.2rem]" />
+								{option.label}
+							</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</Control>
+			<Control position="top-right" class="w-fit float-right pb-4">
+				<Button
+					class={bearing === 0 ? 'hidden' : null}
+					size="icon"
+					title={t.resetToNorth}
+					onclick={() => map!.resetNorth()}
+				>
+					<Compass class="w-5 h-5" />
+				</Button>
+				<Button size="icon" title={t.showMyLocation} onclick={() => getLocation()}>
+					<LocateFixed class="w-5 h-5" />
+				</Button>
+				<Button
+					size="icon"
+					title={t.toggleHillshades}
+					variant={withHillshades ? 'default' : 'outline'}
+					onclick={() => (withHillshades = !withHillshades)}
+				>
+					<MountainSnow class="w-5 h-5" />
+				</Button>
+			</Control>
+			{#if showRoutes}
+				<Routes
+					{map}
+					{bounds}
+					{zoom}
+					shapesDebugEnabled={serverConfig?.shapesDebugEnabled === true}
+				/>
+			{/if}
+			<Rentals
+				{map}
+				{bounds}
+				{zoom}
+				{theme}
+				isSmallScreen={isSmallScreen.current}
+				debug={hasDebug}
+			/>
+		{/if}
+
+		{#if colorMode === 'stops'}
+			<StopsView {map} {bounds} {zoom} {level} {theme} />
+		{/if}
+		<RailViz
+			{map}
+			{bounds}
+			{zoom}
+			colorMode={colorMode === 'rt' || colorMode === 'route' || colorMode === 'mode'
+				? colorMode
+				: 'none'}
+		/>
+		<Isochrones
+			{map}
+			{isochronesData}
+			streetModes={arriveBy ? preTransitModes : postTransitModes}
+			wheelchair={pedestrianProfile === 'WHEELCHAIR'}
+			maxAllTime={arriveBy ? maxPreTransitTime : maxPostTransitTime}
+			{maxTravelTime}
+			active={activeTab == 'isochrones'}
+			options={isochronesOptions}
+		/>
+
+		{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
+			{#each routingResponses as r, rI (rI)}
+				{#await r then r}
+					{#each r.itineraries as it, i (i)}
+						<ItineraryGeoJson
+							itinerary={it}
+							id="{rI}-{i}"
+							selected={false}
+							selectItinerary={() => {
+								onSelectItinerary(it);
+							}}
+							{level}
+							{theme}
+						/>
+					{/each}
+				{/await}
+			{/each}
+		{/if}
+		{#if activeTab == 'connections' && page.state.selectedItinerary}
+			<ItineraryGeoJson itinerary={page.state.selectedItinerary} selected={true} {level} {theme} />
+			<StopGeoJSON itinerary={page.state.selectedItinerary} {theme} />
+		{/if}
+
+		<Popup trigger="contextmenu" children={contextMenu} />
+
+		{#if from && activeTab == 'connections'}
+			<Marker
+				color="green"
+				draggable={true}
+				{level}
+				bind:location={from}
+				bind:marker={fromMarker}
+			/>
+		{/if}
+		{#if to && activeTab == 'connections'}
+			<Marker color="red" draggable={true} {level} bind:location={to} bind:marker={toMarker} />
+		{/if}
+		{#if stop && activeTab == 'departures'}
+			<Marker
+				color="black"
+				draggable={false}
+				{level}
+				bind:location={stop}
+				bind:marker={stopMarker}
+			/>
+		{/if}
+		{#if one && activeTab == 'isochrones'}
+			<Marker color="yellow" draggable={true} {level} bind:location={one} bind:marker={oneMarker} />
+		{/if}
+	{/if}
+
 	{#if children}
 		{@render children()}
 	{/if}

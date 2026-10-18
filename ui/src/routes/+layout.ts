@@ -1,5 +1,6 @@
 import { client } from '@motis-project/motis-client';
 import { browser } from '$app/environment';
+import { language } from '$lib/i18n/translation';
 import type { QuerySerializerOptions } from '@hey-api/client-fetch';
 
 export const prerender = true;
@@ -24,4 +25,6 @@ if (browser) {
 	}
 	const querySerializer = { array: { explode: false } } as QuerySerializerOptions;
 	client.setConfig({ baseUrl, querySerializer }); //`${window.location}`
+
+	document.documentElement.setAttribute('lang', language);
 }

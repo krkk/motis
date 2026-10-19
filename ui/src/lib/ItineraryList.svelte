@@ -45,7 +45,7 @@
 
 {#snippet legSummary(l: Leg)}
 	<div
-		class="flex items-center py-1 px-2 rounded-lg font-bold text-sm h-8 text-nowrap"
+		class="flex items-center py-1 2xl:py-[2px] px-2 rounded-lg font-bold text-sm h-8 2xl:h-auto text-nowrap"
 		style={routeColor(l)}
 	>
 		<svg class="relative mr-1 w-4 h-4 rounded-full">
@@ -79,7 +79,7 @@
 		{/if}
 
 		{#if r.itineraries.length !== 0}
-			<div class="flex flex-col space-y-6 px-4 py-8">
+			<div class="flex flex-col space-y-4 px-4 py-8">
 				{#each routingResponses as r, rI (rI)}
 					{#await r}
 						<div class="flex items-center justify-center w-full">
@@ -114,9 +114,9 @@
 									selectItinerary(it);
 								}}
 							>
-								<Card class="p-4">
-									<div class="text-base flex justify-around items-start space-x-1 w-full">
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
+								<Card class="p-4 flex flex-col 2xl:flex-row gap-y-4 gap-x-2 transition hover:bg-accent hover:text-accent-foreground">
+									<div class="text-base flex 2xl:flex-1 justify-between items-start space-x-1">
+										<div class="overflow-hidden basis-1/5 2xl:basis-1/4 h-full flex flex-col">
 											<div class="text-xs font-bold uppercase text-slate-400">{t.departure}</div>
 											<Time
 												isRealtime={isRealtime(
@@ -130,8 +130,16 @@
 												timeZone={it.legs[0].from.tz}
 											/>
 										</div>
-										<Separator orientation="vertical" />
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
+										<div class="overflow-hidden basis-3/5 2xl:basis-2/4 h-full flex flex-col text-sm leading-none text-slate-400">
+											<div class="text-center text-nowrap">
+												{formatDurationSec(it.duration)}
+											</div>
+											<Separator class="m-1 h-[2px]" />
+											<div class="text-center text-nowrap">
+												{it.transfers} {t.transfers}
+											</div>
+										</div>
+										<div class="overflow-hidden basis-1/5 2xl:basis-1/4 h-full flex flex-col">
 											<div class="text-xs font-bold uppercase text-slate-400">{t.arrival}</div>
 											<Time
 												isRealtime={isRealtime(
@@ -145,27 +153,8 @@
 												timeZone={it.legs[it.legs.length - 1].to.tz}
 											/>
 										</div>
-										<Separator orientation="vertical" />
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
-											<div class="text-xs font-bold uppercase text-slate-400">
-												{t.transfers}
-											</div>
-											<div class="text-center text-nowrap">
-												{it.transfers}
-											</div>
-										</div>
-										<Separator orientation="vertical" />
-										<div class="overflow-hidden basis-1/4 h-full flex flex-col">
-											<div class="text-xs font-bold uppercase text-slate-400">
-												{t.duration}
-											</div>
-											<div class="text-center text-nowrap">
-												{formatDurationSec(it.duration)}
-											</div>
-										</div>
 									</div>
-									<Separator class="my-2" />
-									<div class="mt-4 flex flex-wrap gap-x-3 gap-y-3">
+									<div class="flex flex-wrap 2xl:flex-1 items-center gap-3 2xl:gap-2">
 										{#each it.legs.filter((l, i) => (i == 0 && l.duration > 1) || (i == it.legs.length - 1 && l.duration > 1) || l.displayName || l.mode != 'WALK') as l, i (i)}
 											{@render legSummary(l)}
 										{/each}

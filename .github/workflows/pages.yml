@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           # this should match the `pages` option in your adapter-static options
-          path: 'build/'
+          path: 'ui/build/'
           # keep dotfiles such as `static/.well-known`
           include-hidden-files: true
 

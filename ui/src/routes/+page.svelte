@@ -1194,7 +1194,7 @@
 	{#if activeTab == 'connections' && routingResponses.length !== 0 && !page.state.selectedItinerary}
 		<Control class="min-h-0 md:flex md:flex-col md:mb-2} ">
 			<Card
-				class="scrollable w-[520px] h-full md:h-[70vh] {isSmallScreen.current
+				class="scrollable w-[520px] 2xl:w-[754px] h-full md:h-[70vh] {isSmallScreen.current
 					? 'border-0 shadow-none'
 					: ''} overflow-x-hidden bg-background rounded-lg mb-2"
 			>

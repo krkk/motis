@@ -688,7 +688,7 @@ export const getStyle = (
 			// service as a plain solid line (no casing), thinner than living street,
 			// fading in at z13-14 like tracks and footpaths
 			{
-				id: 'footway',
+				id: 'service',
 				type: 'line',
 				source: 'osm',
 				'source-layer': 'streets',

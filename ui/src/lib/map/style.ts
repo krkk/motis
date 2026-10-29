@@ -54,8 +54,7 @@ export const colors = {
 
 		publicTransport: 'rgba(218,140,140,0.3)',
 
-		footway: 'rgb(252, 251, 250)',
-		footwayOutline: 'rgb(206, 202, 199)',
+		service: 'rgb(252, 251, 250)',
 		track: '#c0aa77',
 		livingStreet: 'rgb(248, 245, 244)',
 		footpath: 'rgb(160, 160, 160)',
@@ -130,8 +129,7 @@ export const colors = {
 
 		publicTransport: 'rgba(89, 45, 45, 0.405)',
 
-		footway: 'rgb(30, 30, 30)',
-		footwayOutline: 'rgb(62, 62, 62)',
+		service: 'rgb(30, 30, 30)',
 		track: '#483d24',
 		livingStreet: 'rgb(46, 46, 46)',
 		footpath: 'rgb(80, 80, 80)',
@@ -664,7 +662,7 @@ export const getStyle = (
 			// service as a plain solid line (no casing), thinner than living street,
 			// fading in at z13-14 like tracks and footpaths
 			{
-				id: 'footway',
+				id: 'service',
 				type: 'line',
 				source: 'osm',
 				'source-layer': 'streets',
@@ -678,7 +676,7 @@ export const getStyle = (
 				},
 				minzoom: 13,
 				paint: {
-					'line-color': c.footway,
+					'line-color': c.service,
 					'line-width': [
 						'interpolate',
 						['linear'],
@@ -699,7 +697,7 @@ export const getStyle = (
 				}
 			},
 			{
-				id: 'road_back_residential',
+				id: 'road_residential',
 				type: 'line',
 				source: 'osm',
 				'source-layer': 'streets',

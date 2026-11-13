@@ -42,12 +42,6 @@
 
 	const showHistoryHint = $derived(!inputValue && items.length > 0);
 
-	const restoreSelectedLabel = () => {
-		if (!inputValue && selected?.label) {
-			inputValue = selected.label;
-		}
-	};
-
 	const getDisplayArea = (match: Match | undefined) => {
 		if (match) {
 			const matchedArea = match.areas.find((a) => a.matched);
@@ -167,11 +161,6 @@
 	allowDeselect={false}
 	value={match}
 	bind:open
-	onOpenChange={(o: boolean) => {
-		if (!o) {
-			restoreSelectedLabel();
-		}
-	}}
 	onValueChange={(e: string) => {
 		if (e) {
 			selected = deserialize(e);
@@ -196,13 +185,11 @@
 				open = true;
 			}
 		}}
-		onpointerdown={() => {
-			if (!open) {
-				inputValue = '';
-				open = true;
-			}
+		onpointerup={() => {
+			if (open) return;
+			if (ref.selectionStart === ref.selectionEnd) ref.select();
+			open = true;
 		}}
-		onblur={restoreSelectedLabel}
 		aria-label={placeholder}
 		data-combobox-input={inputValue}
 	/>

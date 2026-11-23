@@ -462,8 +462,8 @@
 								<button
 									type="button"
 									class={cn(
-										"flex-none flex flex-col gap-1 rounded-lg border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left items-center cursor-pointer",
-										(fromDiffers || toDiffers) ? "border-orange-300" : "border-border",
+										'flex-none flex flex-col gap-1 rounded-lg border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left items-center cursor-pointer',
+										fromDiffers || toDiffers ? 'border-orange-300' : 'border-border'
 									)}
 									onclick={() => applyAlternative(l, alt)}
 								>
@@ -495,14 +495,17 @@
 					<div class="flex mt-2 mr-4 gap-2 items-center text-secondary-foreground text-sm">
 						<ExternalLink class="size-4" />
 						{#if l.routeUrl}
-							<a href={l.routeUrl} target="_blank"
+							<a
+								href={l.routeUrl}
+								target="_blank"
 								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
 								{t.routeInformation}
 							</a>
 						{/if}
 						{#if (l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
-							<a href={(l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
+							<a
+								href={(l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
 								target="_blank"
 								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
@@ -510,7 +513,8 @@
 							</a>
 						{/if}
 						{#if l.agencyUrl && l.agencyName}
-							<a href={l.agencyUrl}
+							<a
+								href={l.agencyUrl}
 								target="_blank"
 								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>

@@ -118,10 +118,10 @@ export const colors = {
 		landuseCommercial: '#242424', // oklch(0.26 0 0)
 		landuseIndustrial: '#222225', // oklch(0.255 0.005 286)
 		landuseResidential: '#2b2b2b', // oklch(0.29 0 0)
-		landuseRetail: '#2f2727',  // oklch(0.28 0.012 15)
+		landuseRetail: '#2f2727', // oklch(0.28 0.012 15)
 		landuseConstruction: 'hsl(0, 0%, 34%)',
 		landuseAgriculture: 'hsl(43, 20%, 14%)',
-		siteHospital: 'hsl(0, 100%, 30%)',	
+		siteHospital: 'hsl(0, 100%, 30%)',
 
 		landusePark: '#18221f',
 		landuseNatureLight: '#1e2322', // oklch(0.2507 0.0075 182.35)

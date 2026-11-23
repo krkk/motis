@@ -128,7 +128,9 @@
 									selectItinerary(it);
 								}}
 							>
-								<Card class="p-4 flex flex-col 2xl:flex-row gap-y-4 gap-x-2 transition hover:bg-accent hover:text-accent-foreground">
+								<Card
+									class="p-4 flex flex-col 2xl:flex-row gap-y-4 gap-x-2 transition hover:bg-accent hover:text-accent-foreground"
+								>
 									<div class="text-base flex 2xl:flex-1 justify-between items-start space-x-1">
 										<div class="overflow-hidden basis-1/5 2xl:basis-1/4 h-full flex flex-col">
 											<div class="text-xs font-bold uppercase text-slate-400">{t.departure}</div>
@@ -143,13 +145,16 @@
 												timeZone={it.legs[0].from.tz}
 											/>
 										</div>
-										<div class="overflow-hidden basis-3/5 2xl:basis-2/4 h-full flex flex-col text-sm leading-none text-slate-400">
+										<div
+											class="overflow-hidden basis-3/5 2xl:basis-2/4 h-full flex flex-col text-sm leading-none text-slate-400"
+										>
 											<div class="text-center text-nowrap">
 												{formatDurationSec(it.duration)}
 											</div>
 											<Separator class="m-1 h-[2px]" />
 											<div class="text-center text-nowrap">
-												{it.transfers} {t.transfers}
+												{it.transfers}
+												{t.transfers}
 											</div>
 										</div>
 										<div class="overflow-hidden basis-1/5 2xl:basis-1/4 h-full flex flex-col">

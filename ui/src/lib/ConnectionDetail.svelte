@@ -34,6 +34,7 @@
 	import { getModeLabel } from './map/getModeLabel';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/state';
+	import { cn } from './utils';
 	const {
 		itinerary
 	}: {
@@ -457,19 +458,25 @@
 							{@const startOffset = dayOffset(transit.startTime, l.startTime, transit.from.tz)}
 							{@const fromDiffers = transit.from.name !== l.from.name}
 							{@const toDiffers = transit.to.name !== l.to.name}
-							<button
-								type="button"
-								class="flex-none flex flex-col gap-1 rounded-lg border border-border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left items-center cursor-pointer"
-								onclick={() => applyAlternative(l, alt)}
-							>
-								<div class="text-xs text-secondary-foreground tabular-nums text-center">
-									{#if startOffset !== 0}
-										{shortWeekday(transit.startTime, transit.from.tz)}
-									{/if}
-									{formatTime(new Date(transit.startTime), transit.from.tz)}
-									–
-									{formatTime(new Date(transit.endTime!), transit.to.tz)}
-								</div>
+							<div class="flex flex-col items-center gap-1">
+								<button
+									type="button"
+									class={cn(
+										"flex-none flex flex-col gap-1 rounded-lg border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left items-center cursor-pointer",
+										(fromDiffers || toDiffers) ? "border-orange-300" : "border-border",
+									)}
+									onclick={() => applyAlternative(l, alt)}
+								>
+									<div class="text-xs text-secondary-foreground tabular-nums text-center">
+										{#if startOffset !== 0}
+											{shortWeekday(transit.startTime, transit.from.tz)}
+										{/if}
+										{formatTime(new Date(transit.startTime), transit.from.tz)}
+										–
+										{formatTime(new Date(transit.endTime!), transit.to.tz)}
+									</div>
+									<Route {onClickTrip} l={transit} compact class="pointer-events-none" />
+								</button>
 								{#if fromDiffers || toDiffers}
 									<div
 										class="flex justify-center gap-1 text-xs text-orange-500"

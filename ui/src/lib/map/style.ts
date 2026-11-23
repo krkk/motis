@@ -639,6 +639,34 @@ export const getStyle = (
 					]
 				}
 			},
+			{
+				id: 'road-bicycle-outline',
+				type: 'line',
+				source: 'osm',
+				'source-layer': 'streets',
+				minzoom: 13,
+				filter: [
+					'all',
+					['==', 'bicycle', 'designated'],
+					[
+						'in',
+						'kind',
+						'residential',
+						'unclassified',
+						'service',
+						'track',
+						'living_street',
+						'pedestrian'
+					]
+				],
+				layout: {
+					'line-cap': 'round'
+				},
+				paint: {
+					'line-color': c.cycleway,
+					'line-width': ['interpolate', ['linear'], ['zoom'], 12, 2, 16, 5, 18, 13, 20, 23]
+				}
+			},
 			// living street: a plain solid body like the old service look, no casing
 			{
 				id: 'living-street',
@@ -982,35 +1010,6 @@ export const getStyle = (
 						['case', ['to-boolean', ['get', 'link']], 3, 3.5],
 						roadWidthInterpolation
 					]
-				}
-			},
-			// streets with designated bicycle infrastructure, tinted like VersaTiles
-			{
-				id: 'road-bicycle',
-				type: 'line',
-				source: 'osm',
-				'source-layer': 'streets',
-				minzoom: 13,
-				filter: [
-					'all',
-					['==', 'bicycle', 'designated'],
-					[
-						'in',
-						'kind',
-						'residential',
-						'unclassified',
-						'service',
-						'track',
-						'living_street',
-						'pedestrian'
-					]
-				],
-				layout: {
-					'line-cap': 'round'
-				},
-				paint: {
-					'line-color': c.bicycleRoad,
-					'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 14, 2, 16, 4, 18, 12, 20, 40]
 				}
 			},
 			// one-way arrows like in VersaTiles

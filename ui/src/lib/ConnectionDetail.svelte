@@ -399,9 +399,9 @@
 					-1,
 					pred?.scheduledEndTime
 				)}
-				<div class="flex items-center">
+				<div class="flex items-center gap-1 pr-4">
 					<ArrowRight class="stroke-muted-foreground size-4" />
-					<span class="ml-1">
+					<span class="flex-1">
 						{#if l.tripTo}
 							<Button
 								class="text-[length:inherit] text-muted-foreground leading-none justify-normal text-wrap text-left "
@@ -423,6 +423,24 @@
 							{l.headsign}
 						{/if}
 					</span>
+
+					{#if l.reservation == 'COMPULSORY'}
+						<div title={t.compulsoryReservation}>
+							<ReservationRequired aria-label={t.compulsoryReservation} />
+						</div>
+					{/if}
+
+					{#if l.bikesAllowed}
+						<div title={t.bikesAllowed}>
+							<Bike aria-label={t.bikesAllowed} />
+						</div>
+					{/if}
+
+					{#if l.wheelchairAccessible == 'ACCESSIBLE'}
+						<div title={t.wheelchairAccessible}>
+							<Accessibility aria-label={t.wheelchairAccessible} />
+						</div>
+					{/if}
 				</div>
 
 				<Alerts alerts={l.alerts} tz={l.from.tz || l.to.tz} variant="full" />
@@ -466,26 +484,6 @@
 						{/each}
 					</div>
 				{/if}
-
-				<div class="m-4">
-					{#if l.reservation == 'COMPULSORY'}
-						<div title={t.compulsoryReservation} class="inline">
-							<ReservationRequired aria-label={t.compulsoryReservation} class="inline" />
-						</div>
-					{/if}
-
-					{#if l.bikesAllowed}
-						<div title={t.bikesAllowed} class="inline">
-							<Bike aria-label={t.bikesAllowed} class="inline" />
-						</div>
-					{/if}
-
-					{#if l.wheelchairAccessible == 'ACCESSIBLE'}
-						<div title={t.wheelchairAccessible} class="inline">
-							<Accessibility aria-label={t.wheelchairAccessible} class="inline" />
-						</div>
-					{/if}
-				</div>
 
 				{#if l.routeUrl || (l.ticketUrls && l.ticketUrls.web) || (l.agencyUrl && l.agencyName)}
 					<div class="mt-2 mr-4">

@@ -479,46 +479,36 @@
 										<span>{t.differentStops}</span>
 									</div>
 								{/if}
-								<Route {onClickTrip} l={transit} compact class="pointer-events-none" />
-							</button>
+							</div>
 						{/each}
 					</div>
 				{/if}
 
 				{#if l.routeUrl || (l.ticketUrls && l.ticketUrls.web) || (l.agencyUrl && l.agencyName)}
-					<div class="mt-2 mr-4">
+					<div class="flex mt-2 mr-4 gap-2 items-center text-secondary-foreground text-sm">
+						<ExternalLink class="size-4" />
 						{#if l.routeUrl}
-							<Button
-								variant="secondary"
-								href={l.routeUrl}
-								target="_blank"
-								class="overflow-hidden text-ellipsis whitespace-nowrap px-4 inline-block"
+							<a href={l.routeUrl} target="_blank"
+								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
-								<ExternalLink class="inline" />
 								{t.routeInformation}
-							</Button>
+							</a>
 						{/if}
 						{#if (l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
-							<Button
-								variant="secondary"
-								href={(l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
+							<a href={(l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
 								target="_blank"
-								class="overflow-hidden text-ellipsis whitespace-nowrap px-4 inline-block"
+								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
-								<ExternalLink class="inline" />
 								{t.tickets}
-							</Button>
+							</a>
 						{/if}
 						{#if l.agencyUrl && l.agencyName}
-							<Button
-								variant="secondary"
-								href={l.agencyUrl}
+							<a href={l.agencyUrl}
 								target="_blank"
-								class="overflow-hidden text-ellipsis whitespace-nowrap px-4 inline-block"
+								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
-								<ExternalLink class="inline" />
 								{l.agencyName}
-							</Button>
+							</a>
 						{/if}
 					</div>
 				{/if}

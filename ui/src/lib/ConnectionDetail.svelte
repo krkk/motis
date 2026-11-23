@@ -459,10 +459,10 @@
 							{@const toDiffers = transit.to.name !== l.to.name}
 							<button
 								type="button"
-								class="flex-none flex flex-col gap-1 rounded-lg border border-border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left cursor-pointer"
+								class="flex-none flex flex-col gap-1 rounded-lg border border-border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left items-center cursor-pointer"
 								onclick={() => applyAlternative(l, alt)}
 							>
-								<div class="text-xs text-muted-foreground tabular-nums text-center">
+								<div class="text-xs text-secondary-foreground tabular-nums text-center">
 									{#if startOffset !== 0}
 										{shortWeekday(transit.startTime, transit.from.tz)}
 									{/if}
@@ -472,7 +472,7 @@
 								</div>
 								{#if fromDiffers || toDiffers}
 									<div
-										class="flex items-center justify-center gap-1 text-xs text-orange-500"
+										class="flex justify-center gap-1 text-xs text-orange-500"
 										title="{t.differentStops}: {transit.from.name} → {transit.to.name}"
 									>
 										<TriangleAlert class="size-4" />

@@ -600,30 +600,6 @@ export const getStyle = (
 					]
 				}
 			},
-			{
-				id: 'road_back_residential',
-				type: 'line',
-				source: 'osm',
-				'source-layer': 'streets',
-				filter: ['==', 'kind', 'residential'],
-				layout: {
-					'line-cap': 'round'
-				},
-				paint: {
-					'line-color': c.roadBackResidential,
-					'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0, 9, 0.5, 12, 1, 16, 4, 20, 20],
-					// dimmed in tunnels
-					'line-opacity': [
-						'interpolate',
-						['linear'],
-						['zoom'],
-						12,
-						['case', ['==', ['get', 'tunnel'], true], 0.15, 0.4],
-						15,
-						['case', ['==', ['get', 'tunnel'], true], 0.4, 1]
-					]
-				}
-			},
 			// minor ways (track / living street / service / unclassified) drawn here,
 			// below the bigger streets (primary etc.): the big-road bodies paint over
 			// them at junctions, while unclassified sits on top of track / living
@@ -719,6 +695,30 @@ export const getStyle = (
 						6,
 						20,
 						12
+					]
+				}
+			},
+			{
+				id: 'road_back_residential',
+				type: 'line',
+				source: 'osm',
+				'source-layer': 'streets',
+				filter: ['==', 'kind', 'residential'],
+				layout: {
+					'line-cap': 'round'
+				},
+				paint: {
+					'line-color': c.roadBackResidential,
+					'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0, 9, 0.5, 12, 1, 16, 4, 20, 20],
+					// dimmed in tunnels
+					'line-opacity': [
+						'interpolate',
+						['linear'],
+						['zoom'],
+						12,
+						['case', ['==', ['get', 'tunnel'], true], 0.15, 0.4],
+						15,
+						['case', ['==', ['get', 'tunnel'], true], 0.4, 1]
 					]
 				}
 			},

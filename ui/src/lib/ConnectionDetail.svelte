@@ -34,6 +34,7 @@
 	import { getModeLabel } from './map/getModeLabel';
 	import { pushState } from '$app/navigation';
 	import { page } from '$app/state';
+	import { cn } from './utils';
 	const {
 		itinerary
 	}: {
@@ -317,7 +318,7 @@
 		{@const includedInTransfer =
 			fareTransfer.rule == 'AB' || (fareTransfer.rule == 'A_AB' && l.effectiveFareLegIndex !== 0)}
 		{#if includedInTransfer || fareTransfer.effectiveFareLegProducts[l.effectiveFareLegIndex].length > 0}
-			<div class="pl-1 md:pl-4 my-8 text-xs font-bold">
+			<div class="pl-1 md:pl-4 my-8 text-sm">
 				{#if includedInTransfer || (prevTransitLeg && prevTransitLeg.fareTransferIndex === l.fareTransferIndex && prevTransitLeg.effectiveFareLegIndex === l.effectiveFareLegIndex)}
 					{t.includedInTicket}
 				{:else}
@@ -399,9 +400,9 @@
 					-1,
 					pred?.scheduledEndTime
 				)}
-				<div class="flex items-center">
+				<div class="flex items-center gap-1 pr-4">
 					<ArrowRight class="stroke-muted-foreground size-4" />
-					<span class="ml-1">
+					<span class="flex-1">
 						{#if l.tripTo}
 							<Button
 								class="text-[length:inherit] text-muted-foreground leading-none justify-normal text-wrap text-left "
@@ -423,6 +424,24 @@
 							{l.headsign}
 						{/if}
 					</span>
+
+					{#if l.reservation == 'COMPULSORY'}
+						<div title={t.compulsoryReservation}>
+							<ReservationRequired aria-label={t.compulsoryReservation} />
+						</div>
+					{/if}
+
+					{#if l.bikesAllowed}
+						<div title={t.bikesAllowed}>
+							<Bike aria-label={t.bikesAllowed} />
+						</div>
+					{/if}
+
+					{#if l.wheelchairAccessible == 'ACCESSIBLE'}
+						<div title={t.wheelchairAccessible}>
+							<Accessibility aria-label={t.wheelchairAccessible} />
+						</div>
+					{/if}
 				</div>
 
 				<Alerts alerts={l.alerts} tz={l.from.tz || l.to.tz} variant="full" />
@@ -430,7 +449,7 @@
 				{#if l.alternatives && l.alternatives.length > 0}
 					{@const hasPrevTransit = legs.slice(0, i).some(isTransitLeg)}
 					{@const hasNextTransit = legs.slice(i + 1).some(isTransitLeg)}
-					<div class="mt-3 mb-1 pl-2 text-xs text-muted-foreground">
+					<div class="mt-3 mb-1 pl-2 text-sm text-muted-foreground">
 						{!hasPrevTransit && hasNextTransit ? t.earlierAlternatives : t.laterAlternatives}
 					</div>
 					<div class="mb-3 flex gap-2 overflow-hidden">
@@ -439,88 +458,64 @@
 							{@const startOffset = dayOffset(transit.startTime, l.startTime, transit.from.tz)}
 							{@const fromDiffers = transit.from.name !== l.from.name}
 							{@const toDiffers = transit.to.name !== l.to.name}
-							<button
-								type="button"
-								class="flex-none flex flex-col gap-1 rounded-lg border border-border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left cursor-pointer"
-								onclick={() => applyAlternative(l, alt)}
-							>
-								<div class="text-xs text-muted-foreground tabular-nums text-center">
-									{#if startOffset !== 0}
-										{shortWeekday(transit.startTime, transit.from.tz)}
-									{/if}
-									{formatTime(new Date(transit.startTime), transit.from.tz)}
-									–
-									{formatTime(new Date(transit.endTime!), transit.to.tz)}
-								</div>
+							<div class="flex flex-col items-center gap-1">
+								<button
+									type="button"
+									class={cn(
+										"flex-none flex flex-col gap-1 rounded-lg border bg-muted hover:brightness-95 dark:hover:brightness-125 transition p-2 min-w-fit text-left items-center cursor-pointer",
+										(fromDiffers || toDiffers) ? "border-orange-300" : "border-border",
+									)}
+									onclick={() => applyAlternative(l, alt)}
+								>
+									<div class="text-xs text-secondary-foreground tabular-nums text-center">
+										{#if startOffset !== 0}
+											{shortWeekday(transit.startTime, transit.from.tz)}
+										{/if}
+										{formatTime(new Date(transit.startTime), transit.from.tz)}
+										–
+										{formatTime(new Date(transit.endTime!), transit.to.tz)}
+									</div>
+									<Route {onClickTrip} l={transit} compact class="pointer-events-none" />
+								</button>
 								{#if fromDiffers || toDiffers}
 									<div
-										class="flex items-center justify-center gap-1 text-xs text-orange-500"
+										class="flex justify-center gap-1 text-xs text-orange-500"
 										title="{t.differentStops}: {transit.from.name} → {transit.to.name}"
 									>
 										<TriangleAlert class="size-4" />
 										<span>{t.differentStops}</span>
 									</div>
 								{/if}
-								<Route {onClickTrip} l={transit} compact class="pointer-events-none" />
-							</button>
+							</div>
 						{/each}
 					</div>
 				{/if}
 
-				<div class="m-4">
-					{#if l.reservation == 'COMPULSORY'}
-						<div title={t.compulsoryReservation} class="inline">
-							<ReservationRequired aria-label={t.compulsoryReservation} class="inline" />
-						</div>
-					{/if}
-
-					{#if l.bikesAllowed}
-						<div title={t.bikesAllowed} class="inline">
-							<Bike aria-label={t.bikesAllowed} class="inline" />
-						</div>
-					{/if}
-
-					{#if l.wheelchairAccessible == 'ACCESSIBLE'}
-						<div title={t.wheelchairAccessible} class="inline">
-							<Accessibility aria-label={t.wheelchairAccessible} class="inline" />
-						</div>
-					{/if}
-				</div>
-
 				{#if l.routeUrl || (l.ticketUrls && l.ticketUrls.web) || (l.agencyUrl && l.agencyName)}
-					<div class="mt-2 mr-4">
+					<div class="flex mt-2 mr-4 gap-2 items-center text-secondary-foreground text-sm">
+						<ExternalLink class="size-4" />
 						{#if l.routeUrl}
-							<Button
-								variant="secondary"
-								href={l.routeUrl}
-								target="_blank"
-								class="overflow-hidden text-ellipsis whitespace-nowrap px-4 inline-block"
+							<a href={l.routeUrl} target="_blank"
+								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
-								<ExternalLink class="inline" />
 								{t.routeInformation}
-							</Button>
+							</a>
 						{/if}
 						{#if (l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
-							<Button
-								variant="secondary"
-								href={(l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
+							<a href={(l.ticketUrls && l.ticketUrls.web) || l.agencyFareUrl}
 								target="_blank"
-								class="overflow-hidden text-ellipsis whitespace-nowrap px-4 inline-block"
+								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
-								<ExternalLink class="inline" />
 								{t.tickets}
-							</Button>
+							</a>
 						{/if}
 						{#if l.agencyUrl && l.agencyName}
-							<Button
-								variant="secondary"
-								href={l.agencyUrl}
+							<a href={l.agencyUrl}
 								target="_blank"
-								class="overflow-hidden text-ellipsis whitespace-nowrap px-4 inline-block"
+								class="underline overflow-hidden text-ellipsis whitespace-nowrap inline-block"
 							>
-								<ExternalLink class="inline" />
 								{l.agencyName}
-							</Button>
+							</a>
 						{/if}
 					</div>
 				{/if}
